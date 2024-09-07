@@ -9,7 +9,7 @@ function setup() {
   scale = side / 20  
   createCanvas(side, side);
   snake = new Snake()
-  frameRate(10)
+  frameRate(60)
   walls = new Walls()
   food = spawnFood()
   food2 = spawnFood()
@@ -27,7 +27,7 @@ function spawnFood(type) {
 function draw() {
   
   background('tan');
- // drawGrid();
+ //drawGrid();
   
   snake.update();
   snake.draw();

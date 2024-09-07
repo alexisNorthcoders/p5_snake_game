@@ -1,10 +1,10 @@
 class Snake {
     x = 2 * scale
     y = 4 * scale
-    speed = { x: 1, y: 0 };
+    speed = { x: 1 / scale / 0.2, y: 0 };
     size = 0;
     tail = [];
-    keyPressedThisFrame = false;
+    keyPressedThisFrame = 0;
     isDead = false;
     colors = {
         body: 'green',
@@ -12,15 +12,15 @@ class Snake {
         eyes: 'red'
     }
     direction(x, y) {
-        this.speed.x = x;
-        this.speed.y = y;
+        this.speed.x = x / scale / 0.2;
+        this.speed.y = y / scale / 0.2;
     }
     eat(food) {
         let distance = dist(this.x, this.y, food.x, food.y)
-        if (distance < 1) {
-            if (food.type === 'super') this.superGrow()
+        if (distance < scale / 2) {
+            if (food.type === 'super') this.superGrow(10)
             if (food.type === 'poison') this.shrink()
-            if (food.type === 'normal') this.grow()
+            if (food.type === 'normal') this.grow(5)
 
             return true
         }
@@ -40,42 +40,35 @@ class Snake {
 
         this.x = this.x + this.speed.x * scale;
         this.y = this.y + this.speed.y * scale;
-        /* this.x = constrain(this.x, 0, width - scale)
-        this.y = constrain(this.y, 0, height - scale) */
-        this.keyPressedThisFrame = false;
+        this.x = constrain(this.x, scale, width - 2 * scale)
+        this.y = constrain(this.y, scale, height - 2 * scale)
+        this.keyPressedThisFrame++;
+        console.log(this.keyPressedThisFrame)
     }
     draw() {
-
         fill(this.colors.body);
         strokeWeight(2);
         stroke(this.colors.body);
+
         for (let i = 0; i < this.tail.length; i++) {
             let segment = this.tail[i];
-            let nextSegment = this.tail[i + 1] || { x: this.x, y: this.y };
-
             fill(this.colors.body);
             circle(segment.x + scale / 2, segment.y + scale / 2, scale);
-
-            // Draw circles to connect segments
-            if (i < this.tail.length - 1) {
-                let circX = (segment.x + nextSegment.x) / 2 + scale / 2;
-                let circY = (segment.y + nextSegment.y) / 2 + scale / 2;
-                circle(circX, circY, scale);
-            }
         }
-        //head
+
+        // Draw head
         fill(this.colors.head);
         circle(this.x + scale / 2, this.y + scale / 2, scale);
+
+        // Draw eyes
         fill(this.colors.eyes);
         stroke('yellow');
         strokeWeight(1);
         rect(this.x + 3 * scale / 5, this.y, scale / 5);
         rect(this.x + scale / 5, this.y, scale / 5);
-
-
     }
     snakeKey(key) {
-        if (this.keyPressedThisFrame || this.isDead) {
+        if (this.keyPressedThisFrame < 5 || this.isDead) {
             return; //ignores key press
         }
         switch (key) {
@@ -100,7 +93,7 @@ class Snake {
                 }
                 break;
         }
-        this.keyPressedThisFrame = true;
+        this.keyPressedThisFrame = 0;
     }
     stop() {
         this.speed.x = 0;
@@ -135,14 +128,17 @@ class Snake {
         }
         this.tail.shift();
     }
-    grow() {
-        this.size++
-        this.tail.push(createVector(this.x, this.y))
+    grow(size) {
+        this.size += size
+        for (let i = 0; i < size; i++) {
+            this.tail.push(createVector(this.x, this.y))
+        }
 
     }
-    superGrow() {
-        this.size += 2
-        this.tail.push(createVector(this.x, this.y))
-        this.tail.push(createVector(this.x, this.y))
+    superGrow(size) {
+        this.size += size
+        for (let i = 0; i < size; i++) {
+            this.tail.push(createVector(this.x, this.y))
+        }
     }
 }
