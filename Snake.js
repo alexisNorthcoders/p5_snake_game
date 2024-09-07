@@ -5,6 +5,9 @@ class Snake {
     size = 0;
     tail = [];
     keyPressedThisFrame = false;
+    isDead = false;
+    flashOpacity = 255;
+    flashDirection = -1; 
     direction(x, y) {
         this.speed.x = x;
         this.speed.y = y;
@@ -21,7 +24,9 @@ class Snake {
         return false
     }
     update() {
-
+        if (this.isDead){
+            return;
+        }
         if (this.size === this.tail.length) {
             for (let i = 0; i < this.tail.length - 1; i++) {
                 this.tail[i] = this.tail[i + 1]
@@ -36,31 +41,35 @@ class Snake {
         this.keyPressedThisFrame = false;
     }
     draw() {
-        fill('green');
-        strokeWeight(2)
-        stroke('darkgreen')
-        for (let i = 0; i < this.tail.length; i++) {
-            if (i === 0) {
-                circle(this.tail[i].x + scale / 2, this.tail[i].y + scale / 2, scale)
-            }
-            else {
-
-                rect(this.tail[i].x, this.tail[i].y, scale, scale)
+        if (this.isDead) {
+            this.flashOpacity += this.flashDirection * 10; // Adjust the speed of flashing by changing the multiplier
+            if (this.flashOpacity <= 0 || this.flashOpacity >= 255) {
+                this.flashDirection *= -1; // Reverse the direction when limits are reached
             }
         }
-        fill('darkgreen')
-        circle(this.x + scale / 2, this.y + scale / 2, scale)
-        fill('red')
-        stroke('yellow')
-        strokeWeight(1)
-        rect(this.x + 3 * scale / 5, this.y, scale / 5)
-        rect(this.x + scale / 5, this.y, scale / 5)
-        stroke('black')
+        fill(`rgba(0, 128, 0, ${this.flashOpacity / 255})`);
+        strokeWeight(2);
+        stroke('darkgreen');
+        for (let i = 0; i < this.tail.length; i++) {
+            if (i === 0) {
+                circle(this.tail[i].x + scale / 2, this.tail[i].y + scale / 2, scale);
+            } else {
+                rect(this.tail[i].x, this.tail[i].y, scale, scale);
+            }
+        }
+        fill('darkgreen');
+        circle(this.x + scale / 2, this.y + scale / 2, scale);
+        fill('red');
+        stroke('yellow');
+        strokeWeight(1);
+        rect(this.x + 3 * scale / 5, this.y, scale / 5);
+        rect(this.x + scale / 5, this.y, scale / 5);
+        stroke('black');
 
 
     }
     snakeKey(key) {
-        if (this.keyPressedThisFrame) {
+        if (this.keyPressedThisFrame || this.isDead) {
             return; //ignores key press
         }
         switch (key) {
@@ -96,9 +105,10 @@ class Snake {
         this.tail.forEach(segment => {
             const distance = dist(this.x, this.y, segment.x, segment.y)
             if (distance === 0) {
+                this.isDead = true;
                 this.stop()
-                this.size = 0
-                this.tail = []
+              //  this.size = 0
+               // this.tail = []
             }
         });
     }
