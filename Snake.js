@@ -4,6 +4,7 @@ class Snake {
     speed = { x: 1, y: 0 };
     size = 0;
     tail = [];
+    keyPressedThisFrame = false;
     direction(x, y) {
         this.speed.x = x;
         this.speed.y = y;
@@ -32,8 +33,7 @@ class Snake {
         this.x = this.x + this.speed.x * scale;
         this.y = this.y + this.speed.y * scale;
 
-        /*  this.x = constrain(this.x, 0, width - scale)
-         this.y = constrain(this.y, 0, height - scale) */
+        this.keyPressedThisFrame = false;
     }
     draw() {
         fill('green');
@@ -60,6 +60,9 @@ class Snake {
 
     }
     snakeKey(key) {
+        if (this.keyPressedThisFrame) {
+            return; //ignores key press
+        }
         switch (key) {
             case ('UP'):
                 if (this.speed.y <= 0 || !this.size) {
@@ -82,6 +85,7 @@ class Snake {
                 }
                 break;
         }
+        this.keyPressedThisFrame = true;
     }
     stop() {
         this.speed.x = 0;
