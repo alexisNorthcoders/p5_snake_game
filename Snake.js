@@ -7,7 +7,7 @@ class Snake {
     keyPressedThisFrame = false;
     isDead = false;
     flashOpacity = 255;
-    flashDirection = -1; 
+    flashDirection = -1;
     direction(x, y) {
         this.speed.x = x;
         this.speed.y = y;
@@ -24,7 +24,7 @@ class Snake {
         return false
     }
     update() {
-        if (this.isDead){
+        if (this.isDead) {
             return;
         }
         if (this.size === this.tail.length) {
@@ -32,31 +32,41 @@ class Snake {
                 this.tail[i] = this.tail[i + 1]
             }
         }
-        
+
         this.tail[this.size - 1] = createVector(this.x, this.y)
 
         this.x = this.x + this.speed.x * scale;
         this.y = this.y + this.speed.y * scale;
-
+        /* this.x = constrain(this.x, 0, width - scale)
+        this.y = constrain(this.y, 0, height - scale) */
         this.keyPressedThisFrame = false;
     }
     draw() {
         if (this.isDead) {
-            this.flashOpacity += this.flashDirection * 10; // Adjust the speed of flashing by changing the multiplier
-            if (this.flashOpacity <= 0 || this.flashOpacity >= 255) {
-                this.flashDirection *= -1; // Reverse the direction when limits are reached
+            this.flashOpacity += this.flashDirection * 50;
+            if (this.flashOpacity <= 50 || this.flashOpacity >= 155) {
+                this.flashDirection *= -1;
             }
         }
         fill(`rgba(0, 128, 0, ${this.flashOpacity / 255})`);
         strokeWeight(2);
-        stroke('darkgreen');
+        stroke('green');
         for (let i = 0; i < this.tail.length; i++) {
-            if (i === 0) {
-                circle(this.tail[i].x + scale / 2, this.tail[i].y + scale / 2, scale);
-            } else {
-                rect(this.tail[i].x, this.tail[i].y, scale, scale);
+            let segment = this.tail[i];
+            let nextSegment = this.tail[i + 1] || { x: this.x, y: this.y };
+            let angle = atan2(nextSegment.y - segment.y, nextSegment.x - segment.x);
+    
+            fill('green');
+            ellipse(segment.x + scale / 2, segment.y + scale / 2, scale, scale);
+    
+            // Draw arcs to connect segments
+            if (i < this.tail.length - 1) {
+                let arcX = (segment.x + nextSegment.x) / 2 + scale / 2;
+                let arcY = (segment.y + nextSegment.y) / 2 + scale / 2;
+                arc(arcX, arcY, scale, scale, angle + PI, angle - PI);
             }
         }
+        //head
         fill('darkgreen');
         circle(this.x + scale / 2, this.y + scale / 2, scale);
         fill('red');
@@ -64,7 +74,6 @@ class Snake {
         strokeWeight(1);
         rect(this.x + 3 * scale / 5, this.y, scale / 5);
         rect(this.x + scale / 5, this.y, scale / 5);
-        stroke('black');
 
 
     }
@@ -107,8 +116,8 @@ class Snake {
             if (distance === 0) {
                 this.isDead = true;
                 this.stop()
-              //  this.size = 0
-               // this.tail = []
+                //  this.size = 0
+                // this.tail = []
             }
         });
     }
@@ -130,7 +139,7 @@ class Snake {
     grow() {
         this.size++
         this.tail.push(createVector(this.x, this.y))
-        
+
     }
     superGrow() {
         this.size += 2

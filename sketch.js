@@ -6,7 +6,7 @@ let food4;
 let key;
 function setup() {
   let side = min(windowWidth, windowHeight)
-  scale = side / 15
+  scale = side / 20  
   createCanvas(side, side);
   snake = new Snake()
   frameRate(10)
@@ -25,11 +25,13 @@ function spawnFood(type) {
 }
 
 function draw() {
-
+  
   background('tan');
-  walls.draw()
+ // drawGrid();
+  
   snake.update();
   snake.draw();
+  walls.draw()
   snake.death();
   const hasCollided = walls.checkCollision(snake);
   if (hasCollided) {
@@ -54,7 +56,7 @@ function draw() {
   if (snake.eat(food4)) {
     food4 = spawnFood('poison')
   }
-  //drawGrid();
+  
 }
 function resizeCanvasToFitWindow() {
   let side = min(windowWidth, windowHeight)
@@ -67,6 +69,7 @@ function windowResized() {
 
 function drawGrid() {
   stroke('white');
+  strokeWeight(0.05);
   for (let x = 0; x < width; x += scale) {
     for (let y = 0; y < height; y += scale) {
       line(x, 0, x, height);

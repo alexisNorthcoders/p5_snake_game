@@ -6,6 +6,8 @@ class Walls {
     rightWall = { x: width - this.thickness, y: 0, width: this.thickness, height: height };
     array = [this.topWall, this.bottomWall, this.leftWall, this.rightWall]
     draw() {
+        stroke('black');
+        strokeWeight(2);
         fill('gray');
         this.array.forEach((wall) => {
             rect(wall.x, wall.y, wall.width, wall.height)
