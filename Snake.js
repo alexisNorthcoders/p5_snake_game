@@ -6,8 +6,11 @@ class Snake {
     tail = [];
     keyPressedThisFrame = false;
     isDead = false;
-    flashOpacity = 255;
-    flashDirection = -1;
+    colors = {
+        body: 'green',
+        head: 'darkgreen',
+        eyes: 'red'
+    }
     direction(x, y) {
         this.speed.x = x;
         this.speed.y = y;
@@ -42,34 +45,28 @@ class Snake {
         this.keyPressedThisFrame = false;
     }
     draw() {
-        if (this.isDead) {
-            this.flashOpacity += this.flashDirection * 50;
-            if (this.flashOpacity <= 50 || this.flashOpacity >= 155) {
-                this.flashDirection *= -1;
-            }
-        }
-        fill(`rgba(0, 128, 0, ${this.flashOpacity / 255})`);
+
+        fill(this.colors.body);
         strokeWeight(2);
-        stroke('green');
+        stroke(this.colors.body);
         for (let i = 0; i < this.tail.length; i++) {
             let segment = this.tail[i];
             let nextSegment = this.tail[i + 1] || { x: this.x, y: this.y };
-            let angle = atan2(nextSegment.y - segment.y, nextSegment.x - segment.x);
-    
-            fill('green');
-            ellipse(segment.x + scale / 2, segment.y + scale / 2, scale, scale);
-    
-            // Draw arcs to connect segments
+
+            fill(this.colors.body);
+            circle(segment.x + scale / 2, segment.y + scale / 2, scale);
+
+            // Draw circles to connect segments
             if (i < this.tail.length - 1) {
-                let arcX = (segment.x + nextSegment.x) / 2 + scale / 2;
-                let arcY = (segment.y + nextSegment.y) / 2 + scale / 2;
-                arc(arcX, arcY, scale, scale, angle + PI, angle - PI);
+                let circX = (segment.x + nextSegment.x) / 2 + scale / 2;
+                let circY = (segment.y + nextSegment.y) / 2 + scale / 2;
+                circle(circX, circY, scale);
             }
         }
         //head
-        fill('darkgreen');
+        fill(this.colors.head);
         circle(this.x + scale / 2, this.y + scale / 2, scale);
-        fill('red');
+        fill(this.colors.eyes);
         stroke('yellow');
         strokeWeight(1);
         rect(this.x + 3 * scale / 5, this.y, scale / 5);
@@ -108,13 +105,15 @@ class Snake {
     stop() {
         this.speed.x = 0;
         this.speed.y = 0;
-        console.log(this.x, this.y)
+        this.isDead = true;
+        this.colors.head = 'black'
+        this.colors.eyes = 'gray'
+        this.colors.body = 'darkred'
     }
     death() {
         this.tail.forEach(segment => {
             const distance = dist(this.x, this.y, segment.x, segment.y)
             if (distance === 0) {
-                this.isDead = true;
                 this.stop()
                 //  this.size = 0
                 // this.tail = []

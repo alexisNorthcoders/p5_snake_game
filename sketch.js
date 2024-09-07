@@ -35,7 +35,7 @@ function draw() {
   snake.death();
   const hasCollided = walls.checkCollision(snake);
   if (hasCollided) {
-    snake.reset()
+    snake.stop()
     console.log('Game Over!')
   }
 
