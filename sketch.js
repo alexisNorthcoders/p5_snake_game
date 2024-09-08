@@ -6,14 +6,22 @@ let fps = 60
 let collision = false
 let side
 let drawWalls = false
-let foodTypes = ['super', 'poison', 'normal']
-let foods = []
-let foodNumber
+let score = 0
+let scoreMultiplier = 2
+let lastScores = 0
+let lastType
+let isSameType = false
+const foodConfig = {
+  types: ['super', 'poison', 'normal'],
+  storage: [],
+  quantity: 0
+}
+
 
 function setup() {
   side = min(windowWidth, windowHeight)
   scale = side / 20
-  foodNumber = floor(scale)
+  foodConfig.quantity = floor(scale / 4)
   createCanvas(side, side);
   snake = new Snake()
   frameRate(fps)
@@ -28,6 +36,7 @@ function draw() {
     showStartScreen()
   }
   else {
+    showScore()
     snake.update();
     snake.draw();
     drawWalls ? walls.draw() : null
@@ -38,9 +47,21 @@ function draw() {
       console.log('Game Over!')
     }
 
-    foods.forEach((food, i) => {
+    foodConfig.storage.forEach((food, i) => {
       if (snake.eat(food)) {
-        foods[i] = spawnFood()
+        if (lastType === food.type) {
+          isSameType = true
+          lastScores += 10
+          score +=10
+        }
+        else {
+          isSameType = false
+          lastType = food.type
+          score += 10
+          score += 2 * lastScores
+          lastScores = 0
+        }
+        foodConfig.storage[i] = spawnFood()
       }
       food.draw()
     })
@@ -100,7 +121,7 @@ function keyPressed() {
   snake.snakeKey(key);
 }
 function spawnFood() {
-  const type = foodTypes[floor(random(0,3))]
+  const type = foodConfig.types[floor(random(0, 3))]
   const cols = floor(width / scale)
   const rows = floor(height / scale)
   return new Food(floor(random(1, cols - 1)) * scale, floor(random(1, rows - 1)) * scale, type)
@@ -141,18 +162,19 @@ function mousePressed() {
   }
 }
 function startGame() {
-  foods.length = 0
-  for (let i = 0; i < foodNumber; i++) {
-    foods.push(spawnFood())
+  foodConfig.storage.length = 0
+  for (let i = 0; i < foodConfig.quantity; i++) {
+    foodConfig.storage.push(spawnFood())
   }
   gameStarted = true
+  showScore()
   loop();
 }
-function restartGame(){
+function restartGame() {
   snake.reset()
-  foods.length = 0
-  for (let i = 0; i < foodNumber; i++) {
-    foods.push(spawnFood())
+  foodConfig.storage.length = 0
+  for (let i = 0; i < foodConfig.quantity; i++) {
+    foodConfig.storage.push(spawnFood())
   }
   loop();
 }
@@ -172,5 +194,18 @@ function showPauseScreen() {
     'Game paused...',
     side / 2,
     side / 2
+  );
+}
+function showScore() {
+  let side = min(windowWidth, windowHeight)
+  stroke('black');
+  strokeWeight(2)
+  fill(255);
+  textAlign(CENTER, CENTER)
+  textSize(scale)
+  text(
+    `Score: ${score}`,
+    side / 2,
+    scale*1.2
   );
 }
