@@ -11,6 +11,7 @@ class Snake {
         head: 'darkgreen',
         eyes: 'red'
     }
+    food = 0;
     direction(x, y) {
         this.speed.x = x / scale / 0.2;
         this.speed.y = y / scale / 0.2;
@@ -18,9 +19,9 @@ class Snake {
     eat(food) {
         let distance = dist(this.x, this.y, food.x, food.y)
         if (distance < scale / 2) {
-            if (food.type === 'super') this.superGrow(10)
+            if (food.type === 'super') this.superGrow(2)
             if (food.type === 'poison') this.shrink()
-            if (food.type === 'normal') this.grow(5)
+            if (food.type === 'normal') this.grow(1)
 
             return true
         }
@@ -40,8 +41,19 @@ class Snake {
 
         this.x = this.x + this.speed.x * scale;
         this.y = this.y + this.speed.y * scale;
-        this.x = constrain(this.x, scale, width - 2 * scale)
-        this.y = constrain(this.y, scale, height - 2 * scale)
+
+        if (this.x > Number(side)) {
+            this.x = 0
+        }
+        if (this.x < 0) {
+            this.x = side
+        }
+        if (this.y > Number(side)) {
+            this.y = 0
+        }
+        if (this.y < 0) {
+            this.y = side
+        }
         this.keyPressedThisFrame++;
     }
     draw() {
@@ -67,7 +79,7 @@ class Snake {
         rect(this.x + scale / 5, this.y, scale / 5);
     }
     snakeKey(key) {
-        if (this.keyPressedThisFrame < 5 || this.isDead) {
+        if (this.keyPressedThisFrame < 2 || this.isDead) {
             return; //ignores key press
         }
         switch (key) {

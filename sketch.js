@@ -6,13 +6,17 @@ let food4;
 let key;
 let gameStarted = false;
 let gamePaused = false
+let fps = 60
+let collision = false
+let side
+let drawWalls = false
 
 function setup() {
-  let side = min(windowWidth, windowHeight)
+  side = min(windowWidth, windowHeight)
   scale = side / 20
   createCanvas(side, side);
   snake = new Snake()
-  frameRate(60)
+  frameRate(fps)
   walls = new Walls()
   food = spawnFood()
   food2 = spawnFood()
@@ -32,10 +36,10 @@ function draw() {
   else {
     snake.update();
     snake.draw();
-    walls.draw()
+    drawWalls ? walls.draw() : null
     snake.death();
     const hasCollided = walls.checkCollision(snake);
-    if (hasCollided) {
+    if (hasCollided && collision) {
       snake.stop()
       console.log('Game Over!')
     }
@@ -70,7 +74,22 @@ function windowResized() {
 }
 
 function keyPressed() {
+console.log(keyCode)
+if (gameStarted === false) {
+  startGame();
+}
   switch (keyCode) {
+    case 80:
+      drawWalls= !drawWalls
+      break
+    case 107:
+      fps+=10
+      frameRate(fps)
+      break
+    case 109:
+      fps-=10
+      frameRate(fps)
+      break
     case 38:
     case 87:
       key = 'UP';
@@ -110,12 +129,12 @@ function drawGrid() {
   }
 }
 function resizeCanvasToFitWindow() {
-  let side = min(windowWidth, windowHeight)
+  side = min(windowWidth, windowHeight)
   scale = side / 20
   resizeCanvas(side, side);
 }
 function showStartScreen() {
-  let side = min(windowWidth, windowHeight)
+  side = min(windowWidth, windowHeight)
   noStroke();
   fill(32);
   rect(10, 10, side - 20, side - 20, scale);
