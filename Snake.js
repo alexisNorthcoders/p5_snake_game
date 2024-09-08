@@ -43,7 +43,6 @@ class Snake {
         this.x = constrain(this.x, scale, width - 2 * scale)
         this.y = constrain(this.y, scale, height - 2 * scale)
         this.keyPressedThisFrame++;
-        console.log(this.keyPressedThisFrame)
     }
     draw() {
         fill(this.colors.body);
