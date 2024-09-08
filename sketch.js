@@ -1,8 +1,4 @@
 let scale;
-let food;
-let food2;
-let food3;
-let food4;
 let key;
 let gameStarted = false;
 let gamePaused = false
@@ -10,20 +6,21 @@ let fps = 60
 let collision = false
 let side
 let drawWalls = false
+let foodTypes = ['super', 'poison', 'normal']
+let foods = []
+let foodNumber
 
 function setup() {
   side = min(windowWidth, windowHeight)
   scale = side / 20
+  foodNumber = floor(scale)
   createCanvas(side, side);
   snake = new Snake()
   frameRate(fps)
   walls = new Walls()
-  food = spawnFood()
-  food2 = spawnFood()
-  food3 = spawnFood('super')
-  food4 = spawnFood('poison')
-
-
+  for (let i = 0; i < foodNumber; i++) {
+    foods.push(spawnFood())
+  }
 }
 
 function draw() {
@@ -44,23 +41,13 @@ function draw() {
       console.log('Game Over!')
     }
 
-    food.draw()
-    food2.draw()
-    food3.draw()
-    food4.draw()
+    foods.forEach((food, i) => {
+      if (snake.eat(food)) {
+        foods[i] = spawnFood()
+      }
+      food.draw()
+    })
 
-    if (snake.eat(food)) {
-      food = spawnFood()
-    }
-    if (snake.eat(food2)) {
-      food2 = spawnFood()
-    }
-    if (snake.eat(food3)) {
-      food3 = spawnFood('super')
-    }
-    if (snake.eat(food4)) {
-      food4 = spawnFood('poison')
-    }
     if (gamePaused) {
       showPauseScreen()
     }
@@ -74,20 +61,20 @@ function windowResized() {
 }
 
 function keyPressed() {
-console.log(keyCode)
-if (gameStarted === false) {
-  startGame();
-}
+  console.log(keyCode)
+  if (gameStarted === false) {
+    startGame();
+  }
   switch (keyCode) {
     case 80:
-      drawWalls= !drawWalls
+      drawWalls = !drawWalls
       break
     case 107:
-      fps+=10
+      fps += 10
       frameRate(fps)
       break
     case 109:
-      fps-=10
+      fps -= 10
       frameRate(fps)
       break
     case 38:
@@ -112,7 +99,8 @@ if (gameStarted === false) {
   }
   snake.snakeKey(key);
 }
-function spawnFood(type) {
+function spawnFood() {
+  const type = foodTypes[floor(random(0,3))]
   const cols = floor(width / scale)
   const rows = floor(height / scale)
   return new Food(floor(random(1, cols - 1)) * scale, floor(random(1, rows - 1)) * scale, type)

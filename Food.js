@@ -3,7 +3,6 @@ class Food {
         this.x = col
         this.y = row
         this.type = type
-        console.log(`Food location: (${this.x}, ${this.y})`);
     }
     draw() {
         stroke('darkorange');
