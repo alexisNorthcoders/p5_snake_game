@@ -18,9 +18,6 @@ function setup() {
   snake = new Snake()
   frameRate(fps)
   walls = new Walls()
-  for (let i = 0; i < foodNumber; i++) {
-    foods.push(spawnFood())
-  }
 }
 
 function draw() {
@@ -59,7 +56,6 @@ function draw() {
 function windowResized() {
   resizeCanvasToFitWindow();
 }
-
 function keyPressed() {
   console.log(keyCode)
   if (gameStarted === false) {
@@ -93,6 +89,10 @@ function keyPressed() {
     case 68:
       key = 'RIGHT';
       break;
+    case 82:
+      restartGame()
+      key = 'RIGHT'
+      break;
     case ENTER:
       pauseGame()
       break;
@@ -105,7 +105,6 @@ function spawnFood() {
   const rows = floor(height / scale)
   return new Food(floor(random(1, cols - 1)) * scale, floor(random(1, rows - 1)) * scale, type)
 }
-
 function drawGrid() {
   stroke('white');
   strokeWeight(0.05);
@@ -142,7 +141,19 @@ function mousePressed() {
   }
 }
 function startGame() {
+  foods.length = 0
+  for (let i = 0; i < foodNumber; i++) {
+    foods.push(spawnFood())
+  }
   gameStarted = true
+  loop();
+}
+function restartGame(){
+  snake.reset()
+  foods.length = 0
+  for (let i = 0; i < foodNumber; i++) {
+    foods.push(spawnFood())
+  }
   loop();
 }
 function pauseGame() {

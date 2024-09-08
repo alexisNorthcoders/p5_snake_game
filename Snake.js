@@ -119,18 +119,22 @@ class Snake {
             const distance = dist(this.x, this.y, segment.x, segment.y)
             if (distance === 0) {
                 this.stop()
-                //  this.size = 0
-                // this.tail = []
             }
         });
     }
     reset() {
+        this.isDead = false
         this.x = 2 * scale
         this.y = 4 * scale
         this.tail = []
         this.size = 0
-        this.speaed = { x: 1, y: 0 };
+        this.speed = { x: 1 / scale / 0.2, y: 0 };
         this.direction(1, 0)
+        this.colors = {
+            body: 'green',
+            head: 'darkgreen',
+            eyes: 'red'
+        }
 
     }
     shrink() {
