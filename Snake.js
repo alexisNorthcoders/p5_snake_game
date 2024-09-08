@@ -1,6 +1,10 @@
 class Snake {
-    x = 2 * scale
-    y = 4 * scale
+    constructor(x = 2, y = 4, type = 'player') {
+        this.type = type
+        this.x = x * scale
+        this.y = y * scale
+    }
+
     speed = { x: 1 / scale / 0.2, y: 0 };
     size = 0;
     tail = [];
@@ -19,9 +23,9 @@ class Snake {
     eat(food) {
         let distance = dist(this.x, this.y, food.x, food.y)
         if (distance < scale / 2) {
-            if (food.type === 'super') this.superGrow(2)
+            if (food.type === 'super') this.superGrow(10)
             if (food.type === 'poison') this.shrink()
-            if (food.type === 'normal') this.grow(1)
+            if (food.type === 'normal') this.grow(5)
             if (food.type === 'death') this.stop()
 
             return true

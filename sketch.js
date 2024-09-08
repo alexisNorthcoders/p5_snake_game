@@ -24,6 +24,7 @@ function setup() {
   foodConfig.quantity = floor(scale / 4)
   createCanvas(side, side);
   snake = new Snake()
+  pcSnake = new Snake(8, 4, 'pc')
   frameRate(fps)
   walls = new Walls()
 }
@@ -39,6 +40,8 @@ function draw() {
     showScore()
     snake.update();
     snake.draw();
+    pcSnake.update()
+    pcSnake.draw()
     drawWalls ? walls.draw() : null
     snake.death();
     const hasCollided = walls.checkCollision(snake);
@@ -52,7 +55,7 @@ function draw() {
         if (lastType === food.type) {
           isSameType = true
           lastScores += 10
-          score +=10
+          score += 10
         }
         else {
           isSameType = false
@@ -111,6 +114,19 @@ function keyPressed() {
     case 68:
       key = 'RIGHT';
       break;
+      // pc player
+    case 89:
+      pcSnake.snakeKey('UP')
+      break;
+    case 72:
+      pcSnake.snakeKey('DOWN')
+      break;
+    case 71:
+      pcSnake.snakeKey('LEFT')
+      break;
+    case 74:
+      pcSnake.snakeKey('RIGHT')
+      break;
     case 82:
       restartGame()
       key = 'RIGHT'
@@ -120,6 +136,7 @@ function keyPressed() {
       break;
   }
   snake.snakeKey(key);
+  
 }
 function spawnFood() {
   const type = foodConfig.types[floor(random(0, 3))]
@@ -207,6 +224,6 @@ function showScore() {
   text(
     `Score: ${score}`,
     side / 2,
-    scale*1.2
+    scale * 1.2
   );
 }
