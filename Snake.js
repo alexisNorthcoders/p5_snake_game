@@ -22,6 +22,7 @@ class Snake {
             if (food.type === 'super') this.superGrow(2)
             if (food.type === 'poison') this.shrink()
             if (food.type === 'normal') this.grow(1)
+            if (food.type === 'death') this.stop()
 
             return true
         }

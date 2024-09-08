@@ -12,7 +12,7 @@ let lastScores = 0
 let lastType
 let isSameType = false
 const foodConfig = {
-  types: ['super', 'poison', 'normal'],
+  types: ['super', 'normal'],
   storage: [],
   quantity: 0
 }
@@ -64,6 +64,7 @@ function draw() {
         foodConfig.storage[i] = spawnFood()
       }
       food.draw()
+      food.update()
     })
 
     if (gamePaused) {
