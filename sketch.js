@@ -145,7 +145,7 @@ function pauseGame() {
 function showPauseScreen() {
   let side = min(windowWidth, windowHeight)
   noStroke();
-  fill(32);
+  fill(0, 127);
   rect(10, side / 2 - scale, side - 20, 2 * scale, scale);
   fill(255);
   textAlign(CENTER, CENTER)
