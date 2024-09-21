@@ -66,6 +66,21 @@ function draw() {
         }
         foodConfig.storage[i] = spawnFood()
       }
+      if (pcSnake.eat(food)) {
+        if (lastType === food.type) {
+          isSameType = true
+          lastScores += 10
+          score += 10
+        }
+        else {
+          isSameType = false
+          lastType = food.type
+          score += 10
+          score += 2 * lastScores
+          lastScores = 0
+        }
+        foodConfig.storage[i] = spawnFood()
+      }
       food.draw()
       food.update()
     })
