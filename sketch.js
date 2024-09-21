@@ -97,7 +97,7 @@ function windowResized() {
   resizeCanvasToFitWindow();
 }
 function keyPressed() {
-  console.log(keyCode)
+  
   if (gameStarted === false) {
     startGame();
   }
@@ -129,7 +129,7 @@ function keyPressed() {
     case 68:
       key = 'RIGHT';
       break;
-      // pc player
+    // pc player
     case 89:
       pcSnake.snakeKey('UP')
       break;
@@ -151,7 +151,7 @@ function keyPressed() {
       break;
   }
   snake.snakeKey(key);
-  
+
 }
 function spawnFood() {
   const type = foodConfig.types[floor(random(0, 3))]
@@ -175,6 +175,7 @@ function resizeCanvasToFitWindow() {
   resizeCanvas(side, side);
 }
 function showStartScreen() {
+  getUserScore(1)
   side = min(windowWidth, windowHeight)
   noStroke();
   fill(32);
@@ -203,8 +204,10 @@ function startGame() {
   showScore()
   loop();
 }
-function restartGame() {
-  snake.reset()
+async function restartGame() {
+  console.log('Reseting game...')
+  await snake.reset()
+  score = 0;
   foodConfig.storage.length = 0
   for (let i = 0; i < foodConfig.quantity; i++) {
     foodConfig.storage.push(spawnFood())
@@ -241,4 +244,47 @@ function showScore() {
     side / 2,
     scale * 1.2
   );
+}
+
+async function getUserScore(userId) {
+  try {
+    const response = await fetch(`/snake/score/${userId}`);
+    if (!response.ok) {
+      throw new Error(`Error fetching score: ${response.statusText}`);
+    }
+    const scores = await response.json();
+    console.log("User scores:", scores);
+    return scores;
+  } catch (error) {
+    console.error("Error retrieving user score:", error);
+    return null;
+  }
+}
+
+async function postUserScore(userId) {
+  try {
+    
+    const params = {
+      score
+    }
+    const options = {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+        },
+      body: JSON.stringify(params)
+    }
+    const response = await fetch(`/snake/score/${userId}`,options);
+
+    if (!response.ok) {
+      throw new Error(`Error posting score: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log("Score added:", result);
+    return result;
+  } catch (error) {
+    console.error("Error posting user score:", error);
+    return null;
+  }
 }

@@ -127,7 +127,8 @@ class Snake {
             }
         });
     }
-    reset() {
+    async reset() {
+        await postUserScore(1)
         this.isDead = false
         this.x = 2 * scale
         this.y = 4 * scale
