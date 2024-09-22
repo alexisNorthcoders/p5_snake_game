@@ -1,3 +1,7 @@
+const socket = io("http://raspberrypi.local:7000", {transports:["websocket"]});
+
+let players = {};
+
 let scale;
 let key;
 let gameStarted = false;
@@ -17,6 +21,19 @@ const foodConfig = {
   quantity: 0
 }
 
+socket.on("connect", () => {
+  let name = "";
+  if (localStorage.getItem("username")) {
+    name = localStorage.getItem("username");
+  } else {
+    name = prompt("What is your name?");
+    localStorage.setItem("username", name);
+  }
+
+  console.log("You joined as " + name);
+  socket.emit("newPlayer", name);
+});
+
 
 function setup() {
   side = min(windowWidth, windowHeight)
@@ -27,6 +44,27 @@ function setup() {
   pcSnake = new Snake(8, 4, 'pc')
   frameRate(fps)
   walls = new Walls()
+  // Listen for new players
+socket.on('newPlayer', (player) => {
+  players[player.id] = player;
+  draw();
+});
+
+// Listen for player movements
+socket.on('playerMoved', (player) => {
+  if (players[player.id]) {
+    players[player.id].x = player.x;
+    players[player.id].y = player.y;
+    players[player.id].direction = player.direction;
+    draw();
+  }
+});
+
+// Listen for disconnections
+socket.on('playerDisconnected', (id) => {
+  delete players[id];
+  draw();
+});
 }
 
 function draw() {
@@ -151,6 +189,7 @@ function keyPressed() {
       break;
   }
   snake.snakeKey(key);
+  socket.emit('playerMovement',key)
 
 }
 function spawnFood() {
