@@ -1,4 +1,4 @@
-const socket = io("http://raspberrypi.local:7000", {transports:["websocket"]});
+const socket = io("http://raspberrypi.local:7000", { transports: ["websocket"] });
 
 let players = {};
 
@@ -15,6 +15,7 @@ let scoreMultiplier = 2
 let lastScores = 0
 let lastType
 let isSameType = false
+let disableFood = true
 const foodConfig = {
   types: ['super', 'normal'],
   storage: [],
@@ -45,26 +46,26 @@ function setup() {
   frameRate(fps)
   walls = new Walls()
   // Listen for new players
-socket.on('newPlayer', (player) => {
-  players[player.id] = player;
-  draw();
-});
-
-// Listen for player movements
-socket.on('playerMoved', (player) => {
-  if (players[player.id]) {
-    players[player.id].x = player.x;
-    players[player.id].y = player.y;
-    players[player.id].direction = player.direction;
+  socket.on('newPlayer', (player) => {
+    players[player.id] = player;
     draw();
-  }
-});
+  });
 
-// Listen for disconnections
-socket.on('playerDisconnected', (id) => {
-  delete players[id];
-  draw();
-});
+  // Listen for player movements
+  socket.on('playerMoved', (player) => {
+    if (players[player.id]) {
+      players[player.id].x = player.x;
+      players[player.id].y = player.y;
+      players[player.id].direction = player.direction;
+      draw();
+    }
+  });
+
+  // Listen for disconnections
+  socket.on('playerDisconnected', (id) => {
+    delete players[id];
+    draw();
+  });
 }
 
 function draw() {
@@ -87,41 +88,43 @@ function draw() {
       snake.stop()
       console.log('Game Over!')
     }
+    if (!disableFood) {
+      foodConfig.storage.forEach((food, i) => {
+        if (snake.eat(food)) {
+          if (lastType === food.type) {
+            isSameType = true
+            lastScores += 10
+            score += 10
+          }
+          else {
+            isSameType = false
+            lastType = food.type
+            score += 10
+            score += 2 * lastScores
+            lastScores = 0
+          }
+          foodConfig.storage[i] = spawnOneFood()
+        }
+        if (pcSnake.eat(food)) {
+          if (lastType === food.type) {
+            isSameType = true
+            lastScores += 10
+            score += 10
+          }
+          else {
+            isSameType = false
+            lastType = food.type
+            score += 10
+            score += 2 * lastScores
+            lastScores = 0
+          }
+          foodConfig.storage[i] = spawnOneFood()
+        }
+        food.draw()
+        food.update()
+      })
+    }
 
-    foodConfig.storage.forEach((food, i) => {
-      if (snake.eat(food)) {
-        if (lastType === food.type) {
-          isSameType = true
-          lastScores += 10
-          score += 10
-        }
-        else {
-          isSameType = false
-          lastType = food.type
-          score += 10
-          score += 2 * lastScores
-          lastScores = 0
-        }
-        foodConfig.storage[i] = spawnFood()
-      }
-      if (pcSnake.eat(food)) {
-        if (lastType === food.type) {
-          isSameType = true
-          lastScores += 10
-          score += 10
-        }
-        else {
-          isSameType = false
-          lastType = food.type
-          score += 10
-          score += 2 * lastScores
-          lastScores = 0
-        }
-        foodConfig.storage[i] = spawnFood()
-      }
-      food.draw()
-      food.update()
-    })
 
     if (gamePaused) {
       showPauseScreen()
@@ -135,7 +138,7 @@ function windowResized() {
   resizeCanvasToFitWindow();
 }
 function keyPressed() {
-  
+
   if (gameStarted === false) {
     startGame();
   }
@@ -189,14 +192,23 @@ function keyPressed() {
       break;
   }
   snake.snakeKey(key);
-  socket.emit('playerMovement',key)
+  socket.emit('playerMovement', key)
 
 }
-function spawnFood() {
+function spawnOneFood() {
+  if (disableFood) {
+    return
+  }
   const type = foodConfig.types[floor(random(0, 3))]
   const cols = floor(width / scale)
   const rows = floor(height / scale)
   return new Food(floor(random(1, cols - 1)) * scale, floor(random(1, rows - 1)) * scale, type)
+}
+function spawnFood() {
+  foodConfig.storage.length = 0
+  for (let i = 0; i < foodConfig.quantity; i++) {
+    foodConfig.storage.push(spawnOneFood())
+  }
 }
 function drawGrid() {
   stroke('white');
@@ -235,10 +247,7 @@ function mousePressed() {
   }
 }
 function startGame() {
-  foodConfig.storage.length = 0
-  for (let i = 0; i < foodConfig.quantity; i++) {
-    foodConfig.storage.push(spawnFood())
-  }
+  spawnFood()
   gameStarted = true
   showScore()
   loop();
@@ -247,10 +256,7 @@ async function restartGame() {
   console.log('Reseting game...')
   await snake.reset()
   score = 0;
-  foodConfig.storage.length = 0
-  for (let i = 0; i < foodConfig.quantity; i++) {
-    foodConfig.storage.push(spawnFood())
-  }
+  spawnFood()
   loop();
 }
 function pauseGame() {
@@ -302,18 +308,18 @@ async function getUserScore(userId) {
 
 async function postUserScore(userId) {
   try {
-    
+
     const params = {
       score
     }
     const options = {
       method: 'POST',
       headers: {
-          'Content-Type': 'application/json',
-        },
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(params)
     }
-    const response = await fetch(`/snake/score/${userId}`,options);
+    const response = await fetch(`/snake/score/${userId}`, options);
 
     if (!response.ok) {
       throw new Error(`Error posting score: ${response.statusText}`);
