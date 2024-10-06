@@ -1,8 +1,11 @@
 const socket = io("http://raspberrypi.local:7000", { transports: ["websocket"] });
-let chompSound = new Audio('assets/sound/chomp.mp3');
 
+function playChompSound() {
+  let chompSound = new Audio('assets/sound/chomp.mp3');
+  chompSound.play();
+}
 let players = {};
-
+let audioStarted = false;
 let scale;
 let key;
 let gameStarted = false;

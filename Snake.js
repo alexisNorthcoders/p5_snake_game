@@ -34,7 +34,7 @@ class Snake {
         if (distance < scale / 2) {
             if (food.type === 'super') {
                 this.superGrow(10)
-                chompSound.play()
+                playChompSound()
             }
             if (food.type === 'poison') {
                 this.shrink()
