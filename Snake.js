@@ -1,6 +1,7 @@
 class Snake {
     constructor(x = 2, y = 4, type = 'player') {
         this.type = type
+        this.start = { x, y }
         this.x = x * scale
         this.y = y * scale
     }
@@ -10,11 +11,19 @@ class Snake {
     tail = [];
     keyPressedThisFrame = 0;
     isDead = false;
-    colors = {
-        body: 'green',
-        head: 'darkgreen',
-        eyes: 'red'
-    }
+    colors =
+        {
+            'player': {
+                body: 'blue',
+                head: 'brown',
+                eyes: 'red'
+            },
+            'pc': {
+                body: 'green',
+                head: 'darkgreen',
+                eyes: 'red'
+            }
+        }
     food = 0;
     direction(x, y) {
         this.speed.x = x / scale / 0.2;
@@ -23,10 +32,22 @@ class Snake {
     eat(food) {
         let distance = dist(this.x, this.y, food.x, food.y)
         if (distance < scale / 2) {
-            if (food.type === 'super') this.superGrow(10)
-            if (food.type === 'poison') this.shrink()
-            if (food.type === 'normal') this.grow(5)
-            if (food.type === 'death') this.stop()
+            if (food.type === 'super') {
+                this.superGrow(10)
+                chompSound.play()
+            }
+            if (food.type === 'poison') {
+                this.shrink()
+
+            }
+            if (food.type === 'normal') {
+                this.grow(5)
+                playSound(500, 200)
+            }
+            if (food.type === 'death') {
+                playSound(500, 200)
+                this.stop()
+            }
 
             return true
         }
@@ -62,22 +83,22 @@ class Snake {
         this.keyPressedThisFrame++;
     }
     draw() {
-        fill(this.colors.body);
+        fill(this.colors[this.type].body);
         strokeWeight(2);
-        stroke(this.colors.body);
+        stroke(this.colors[this.type].body);
 
         for (let i = 0; i < this.tail.length; i++) {
             let segment = this.tail[i];
-            fill(this.colors.body);
+            fill(this.colors[this.type].body);
             circle(segment.x + scale / 2, segment.y + scale / 2, scale);
         }
 
         // Draw head
-        fill(this.colors.head);
+        fill(this.colors[this.type].head);
         circle(this.x + scale / 2, this.y + scale / 2, scale);
 
         // Draw eyes
-        fill(this.colors.eyes);
+        fill(this.colors[this.type].eyes);
         stroke('yellow');
         strokeWeight(1);
         rect(this.x + 3 * scale / 5, this.y, scale / 5);
@@ -115,9 +136,9 @@ class Snake {
         this.speed.x = 0;
         this.speed.y = 0;
         this.isDead = true;
-        this.colors.head = 'black'
-        this.colors.eyes = 'gray'
-        this.colors.body = 'darkred'
+        this.colors[this.type].head = 'black'
+        this.colors[this.type].eyes = 'gray'
+        this.colors[this.type].body = 'darkred'
     }
     death() {
         this.tail.forEach(segment => {
@@ -130,17 +151,13 @@ class Snake {
     async reset() {
         await postUserScore(1)
         this.isDead = false
-        this.x = 2 * scale
-        this.y = 4 * scale
+        this.resetColors()
+        this.x = this.start.x * scale
+        this.y = this.start.y * scale
         this.tail = []
         this.size = 0
         this.speed = { x: 1 / scale / 0.2, y: 0 };
         this.direction(1, 0)
-        this.colors = {
-            body: 'green',
-            head: 'darkgreen',
-            eyes: 'red'
-        }
 
     }
     shrink() {
@@ -160,6 +177,21 @@ class Snake {
         this.size += size
         for (let i = 0; i < size; i++) {
             this.tail.push(createVector(this.x, this.y))
+        }
+    }
+    resetColors() {
+        this.colors =
+        {
+            'player': {
+                body: 'blue',
+                head: 'brown',
+                eyes: 'red'
+            },
+            'pc': {
+                body: 'green',
+                head: 'darkgreen',
+                eyes: 'red'
+            }
         }
     }
 }

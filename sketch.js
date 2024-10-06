@@ -1,4 +1,5 @@
 const socket = io("http://raspberrypi.local:7000", { transports: ["websocket"] });
+let chompSound = new Audio('assets/sound/chomp.mp3');
 
 let players = {};
 
@@ -15,7 +16,7 @@ let scoreMultiplier = 2
 let lastScores = 0
 let lastType
 let isSameType = false
-let disableFood = true
+let disableFood = false
 const foodConfig = {
   types: ['super', 'normal'],
   storage: [],
@@ -121,7 +122,7 @@ function draw() {
           foodConfig.storage[i] = spawnOneFood()
         }
         food.draw()
-        food.update()
+      //  food.update()
       })
     }
 
@@ -255,6 +256,7 @@ function startGame() {
 async function restartGame() {
   console.log('Reseting game...')
   await snake.reset()
+  await pcSnake.reset()
   score = 0;
   spawnFood()
   loop();
@@ -289,6 +291,25 @@ function showScore() {
     side / 2,
     scale * 1.2
   );
+}
+
+function playSound(frequency, duration) {
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  const oscillator = audioCtx.createOscillator();
+
+  oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  oscillator.start();
+  
+  oscillator.stop(audioCtx.currentTime + duration / 1000);
 }
 
 async function getUserScore(userId) {
