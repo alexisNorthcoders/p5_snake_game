@@ -4,13 +4,14 @@ function playChompSound() {
   let chompSound = new Audio('assets/sound/chomp.mp3');
   chompSound.play();
 }
+let showGrid = false;
 let players = {};
 let audioStarted = false;
 let scale;
 let key;
 let gameStarted = false;
 let gamePaused = false
-let fps = 60
+let fps = 10
 let collision = false
 let side
 let drawWalls = false
@@ -38,7 +39,12 @@ socket.on("connect", () => {
   console.log("You joined as " + name);
   socket.emit("newPlayer", name);
 });
-
+function getRandomColor() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
+}
 
 function setup() {
   side = min(windowWidth, windowHeight)
@@ -52,7 +58,7 @@ function setup() {
   // Listen for new players
   socket.on('newPlayer', (player) => {
     players[player.id] = player;
-    draw();
+    //  draw();
   });
 
   // Listen for player movements
@@ -61,21 +67,21 @@ function setup() {
       players[player.id].x = player.x;
       players[player.id].y = player.y;
       players[player.id].direction = player.direction;
-      draw();
+      // draw();
     }
   });
 
   // Listen for disconnections
   socket.on('playerDisconnected', (id) => {
     delete players[id];
-    draw();
+    // draw();
   });
 }
 
 function draw() {
 
   background('tan');
-  //drawGrid();
+  if (showGrid) drawGrid();
   if (!gameStarted) {
     showStartScreen()
   }
@@ -87,7 +93,7 @@ function draw() {
     pcSnake.draw()
     drawWalls ? walls.draw() : null
     snake.death();
-    const hasCollided = walls.checkCollision(snake);
+    const hasCollided = false //walls.checkCollision(snake);
     if (hasCollided && collision) {
       snake.stop()
       console.log('Game Over!')
@@ -125,7 +131,7 @@ function draw() {
           foodConfig.storage[i] = spawnOneFood()
         }
         food.draw()
-      //  food.update()
+        food.update()
       })
     }
 
@@ -142,13 +148,16 @@ function windowResized() {
   resizeCanvasToFitWindow();
 }
 function keyPressed() {
-
+  console.log(keyCode)
   if (gameStarted === false) {
     startGame();
   }
   switch (keyCode) {
-    case 80:
+    case 49:
       drawWalls = !drawWalls
+      break
+    case 50:
+      showGrid = !showGrid
       break
     case 107:
       fps += 10
@@ -236,8 +245,15 @@ function showStartScreen() {
   fill(32);
   rect(10, 10, side - 20, side - 20, scale);
   fill(255);
+  text(
+    'Key buttons: \n1 Draw walls. \n2 Draw grid. \n+ Increase framerate  \n- Decrease framerate \nEnter Pause game \nR Restart',
+    side / 2,
+    3*scale
+  );
   textAlign(CENTER, CENTER)
+
   textSize(scale)
+
   text(
     'Click to play.\nUse arrow keys or WASD to move.',
     side / 2,
@@ -306,12 +322,12 @@ function playSound(frequency, duration) {
 
   const gainNode = audioCtx.createGain();
   gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-  
+
   oscillator.connect(gainNode);
   gainNode.connect(audioCtx.destination);
 
   oscillator.start();
-  
+
   oscillator.stop(audioCtx.currentTime + duration / 1000);
 }
 

@@ -4,36 +4,38 @@ class Snake {
         this.start = { x, y }
         this.x = x * scale
         this.y = y * scale
+
+        this.colors =
+        {
+            'player': {
+                body: getRandomColor(),
+                head: getRandomColor(),
+                eyes: getRandomColor()
+            },
+            'pc': {
+                body: getRandomColor(),
+                head: getRandomColor(),
+                eyes: getRandomColor()
+            }
+        }
     }
 
-    speed = { x: 1 / scale / 0.2, y: 0 };
+    speed = { x: 1, y: 0 };
     size = 0;
     tail = [];
     keyPressedThisFrame = 0;
     isDead = false;
-    colors =
-        {
-            'player': {
-                body: 'blue',
-                head: 'brown',
-                eyes: 'red'
-            },
-            'pc': {
-                body: 'green',
-                head: 'darkgreen',
-                eyes: 'red'
-            }
-        }
+
     food = 0;
     direction(x, y) {
-        this.speed.x = x / scale / 0.2;
-        this.speed.y = y / scale / 0.2;
+        this.speed.x = x;
+        this.speed.y = y;
     }
     eat(food) {
         let distance = dist(this.x, this.y, food.x, food.y)
         if (distance < scale / 2) {
             if (food.type === 'super') {
-                this.superGrow(10)
+                this.superGrow(2)
                 playChompSound()
             }
             if (food.type === 'poison') {
@@ -41,8 +43,8 @@ class Snake {
 
             }
             if (food.type === 'normal') {
-                this.grow(5)
-                playSound(500, 200)
+                this.grow(1)
+                playChompSound()
             }
             if (food.type === 'death') {
                 playSound(500, 200)
@@ -57,13 +59,14 @@ class Snake {
         if (this.isDead) {
             return;
         }
+        //If the total is the same size as array length, meaning no food has been eaten, then shift everything over
         if (this.size === this.tail.length) {
-            for (let i = 0; i < this.tail.length - 1; i++) {
-                this.tail[i] = this.tail[i + 1]
+            for (let i = 0; i < this.tail.length - 1; i++) { //as snakes move shift spots down getting the new spot at the end of the array
+                this.tail[i] = this.tail[i + 1] //as it moves shift everything over by one
             }
         }
 
-        this.tail[this.size - 1] = createVector(this.x, this.y)
+        this.tail[this.size - 1] = createVector(this.x, this.y) //when I am done moving I want the last spot to create Vector on the tail equals to current location of snake
 
         this.x = this.x + this.speed.x * scale;
         this.y = this.y + this.speed.y * scale;
@@ -83,17 +86,20 @@ class Snake {
         this.keyPressedThisFrame++;
     }
     draw() {
-        fill(this.colors[this.type].body);
+        const bodyColor = this.colors[this.type].body
+        fill(bodyColor);
         strokeWeight(2);
-        stroke(this.colors[this.type].body);
+        stroke('black');
 
         for (let i = 0; i < this.tail.length; i++) {
             let segment = this.tail[i];
-            fill(this.colors[this.type].body);
-            circle(segment.x + scale / 2, segment.y + scale / 2, scale);
+            fill(bodyColor);
+            strokeWeight(2);
+            square(segment.x, segment.y, scale);
         }
 
         // Draw head
+        strokeWeight(2);
         fill(this.colors[this.type].head);
         circle(this.x + scale / 2, this.y + scale / 2, scale);
 
@@ -105,7 +111,7 @@ class Snake {
         rect(this.x + scale / 5, this.y, scale / 5);
     }
     snakeKey(key) {
-        if (this.keyPressedThisFrame < 2 || this.isDead) {
+        if (this.keyPressedThisFrame < 1 || this.isDead) {
             return; //ignores key press
         }
         switch (key) {
