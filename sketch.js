@@ -1,4 +1,4 @@
-const socket = io("http://raspberrypi.local:7000", { transports: ["websocket"] });
+const socket = new WebSocket("ws://raspberrypi.local:4001/ws");
 
 function playChompSound() {
   let chompSound = new Audio('assets/sound/chomp.mp3');
@@ -21,63 +21,72 @@ let lastScores = 0
 let lastType
 let isSameType = false
 let disableFood = false
+let name
 const foodConfig = {
   types: ['super', 'normal'],
   storage: [],
   quantity: 0
 }
 
-socket.on("connect", () => {
-  let name = "";
-  if (localStorage.getItem("username")) {
-    name = localStorage.getItem("username");
-  } else {
-    name = prompt("What is your name?");
+socket.onopen = () => {
+  console.log("Connected to WebSocket server");
+
+  name = localStorage.getItem("username") || prompt("What is your name?");
+
+  if (!localStorage.getItem("username")) {
     localStorage.setItem("username", name);
   }
 
-  console.log("You joined as " + name);
-  socket.emit("newPlayer", name);
-});
-function getRandomColor() {
-  const r = Math.floor(Math.random() * 256);
-  const g = Math.floor(Math.random() * 256);
-  const b = Math.floor(Math.random() * 256);
-  return `rgb(${r}, ${g}, ${b})`;
-}
+  console.log(`You joined as ${name}`);
+  socket.send(JSON.stringify({
+    event: "newPlayer",
+    player: { name }
+  }));
+};
 
 function setup() {
   side = min(windowWidth, windowHeight)
   scale = side / 20
   foodConfig.quantity = floor(scale / 4)
   createCanvas(side, side);
+  players
   snake = new Snake()
-  pcSnake = new Snake(8, 4, 'pc')
   frameRate(fps)
   walls = new Walls()
-  // Listen for new players
-  socket.on('newPlayer', (player) => {
-    players[player.id] = player;
-    //  draw();
-  });
+  socket.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
 
-  // Listen for player movements
-  socket.on('playerMoved', (player) => {
-    if (players[player.id]) {
-      players[player.id].x = player.x;
-      players[player.id].y = player.y;
-      players[player.id].direction = player.direction;
-      // draw();
+      switch (data.event) {
+        case "newPlayer":
+          players[data.player.name] = { ...data.player, snake: new Snake() };
+          break;
+
+        case "playerMovement":
+          if (players[data.player.name]) {
+            console.log(`Player: ${data.player.name}, Key: ${data.key}`)
+            players[data.player.name].snake.snakeKey(data.key)
+          }
+          break;
+
+        case "playerDisconnected":
+          delete players[data.player.name];
+          break;
+
+        default:
+          console.warn("Unknown event received:", data);
+      }
+    } catch (error) {
+      console.error("Error parsing message:", error);
     }
-  });
-
-  // Listen for disconnections
-  socket.on('playerDisconnected', (id) => {
-    delete players[id];
-    // draw();
-  });
+  };
 }
-
+function getRandomColor() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
+}
 function draw() {
 
   background('tan');
@@ -87,53 +96,42 @@ function draw() {
   }
   else {
     showScore()
-    snake.update();
-    snake.draw();
-    pcSnake.update()
-    pcSnake.draw()
+    for (let playerName in players) {
+      const snake = players[playerName].snake
+      snake.update();
+      snake.draw();
+      snake.death();
+      if (!disableFood) {
+        foodConfig.storage.forEach((food, i) => {
+          if (snake.eat(food)) {
+            if (lastType === food.type) {
+              isSameType = true
+              lastScores += 10
+              score += 10
+            }
+            else {
+              isSameType = false
+              lastType = food.type
+              score += 10
+              score += 2 * lastScores
+              lastScores = 0
+            }
+            foodConfig.storage[i] = spawnOneFood()
+          }
+
+          food.draw()
+          food.update()
+        })
+      }
+    }
     drawWalls ? walls.draw() : null
-    snake.death();
+
     const hasCollided = false //walls.checkCollision(snake);
     if (hasCollided && collision) {
-      snake.stop()
+      // snake.stop()
       console.log('Game Over!')
     }
-    if (!disableFood) {
-      foodConfig.storage.forEach((food, i) => {
-        if (snake.eat(food)) {
-          if (lastType === food.type) {
-            isSameType = true
-            lastScores += 10
-            score += 10
-          }
-          else {
-            isSameType = false
-            lastType = food.type
-            score += 10
-            score += 2 * lastScores
-            lastScores = 0
-          }
-          foodConfig.storage[i] = spawnOneFood()
-        }
-        if (pcSnake.eat(food)) {
-          if (lastType === food.type) {
-            isSameType = true
-            lastScores += 10
-            score += 10
-          }
-          else {
-            isSameType = false
-            lastType = food.type
-            score += 10
-            score += 2 * lastScores
-            lastScores = 0
-          }
-          foodConfig.storage[i] = spawnOneFood()
-        }
-        food.draw()
-        food.update()
-      })
-    }
+
 
 
     if (gamePaused) {
@@ -148,7 +146,7 @@ function windowResized() {
   resizeCanvasToFitWindow();
 }
 function keyPressed() {
-  console.log(keyCode)
+
   if (gameStarted === false) {
     startGame();
   }
@@ -183,19 +181,6 @@ function keyPressed() {
     case 68:
       key = 'RIGHT';
       break;
-    // pc player
-    case 89:
-      pcSnake.snakeKey('UP')
-      break;
-    case 72:
-      pcSnake.snakeKey('DOWN')
-      break;
-    case 71:
-      pcSnake.snakeKey('LEFT')
-      break;
-    case 74:
-      pcSnake.snakeKey('RIGHT')
-      break;
     case 82:
       restartGame()
       key = 'RIGHT'
@@ -204,8 +189,13 @@ function keyPressed() {
       pauseGame()
       break;
   }
-  snake.snakeKey(key);
-  socket.emit('playerMovement', key)
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({
+      event: "playerMovement",
+      player: { name },
+      key
+    }));
+  }
 
 }
 function spawnOneFood() {
@@ -248,7 +238,7 @@ function showStartScreen() {
   text(
     'Key buttons: \n1 Draw walls. \n2 Draw grid. \n+ Increase framerate  \n- Decrease framerate \nEnter Pause game \nR Restart',
     side / 2,
-    3*scale
+    3 * scale
   );
   textAlign(CENTER, CENTER)
 
