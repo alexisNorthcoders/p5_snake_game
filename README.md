@@ -1,0 +1,69 @@
+# Multiplayer Snake Game
+
+## Overview
+This is a multiplayer Snake game that connects players through a WebSocket server (https://github.com/alexisNorthcoders/go-ws). Players control their own snakes, collect food, and compete for the highest score. The game features walls, adjustable framerate, and different food types that affect scoring.
+
+![alt text](image.png)
+
+## Features
+- Multiplayer support via WebSockets
+- Dynamic grid-based gameplay
+- Customizable game settings (walls, grid, framerate)
+- Score tracking
+- Responsive design for different screen sizes
+- Sound effects for eating food
+
+## Technologies Used
+- JavaScript (ES6)
+- HTML5 Canvas
+- WebSockets (ws://raspberrypi.local:4001/ws)
+
+## Installation
+1. Ensure you have a WebSocket server running at `ws://raspberrypi.local:4001/ws`.
+2. Clone this repository:
+   ```sh
+   git clone https://github.com/yourusername/multiplayer-snake.git
+   ```
+3. Navigate to the project folder:
+   ```sh
+   cd multiplayer-snake
+   ```
+4. Open `index.html` in a browser.
+
+## How to Play
+- Use **Arrow keys** or **WASD** to move your snake.
+- Eat food to increase your score.
+- Avoid collisions with walls (if enabled) and other players.
+- The game starts automatically when you press any movement key or click the screen.
+
+### Controls
+| Key | Action |
+|-----|--------|
+| 1 | Toggle walls |
+| 2 | Toggle grid |
+| + | Increase framerate |
+| - | Decrease framerate |
+| R | Restart game |
+| ENTER | Pause/resume game |
+
+## Game Mechanics
+- **Food Types:** Normal and Super food types appear randomly on the grid.
+- **Scoring System:** Eating the same food type consecutively gives bonus points.
+- **Collision Handling:** Players can enable or disable wall collisions.
+
+## WebSocket Events
+- **newPlayer**: Registers a new player.
+- **playerMovement**: Sends movement data for each player.
+- **playerDisconnected**: Removes a player when they disconnect.
+
+## API Endpoints
+- `GET /snake/score/{userId}` - Retrieve the player's score.
+- `POST /snake/score/{userId}` - Submit a new score.
+
+## TODO
+- Move start game logic to server
+- Move food spawn logic to server
+- Add waiting room for players
+- Allow multiple rooms
+- Allow for single game mode / local multiplayer only
+- Single game mode features only ( framerate, canvas resize, etc)
