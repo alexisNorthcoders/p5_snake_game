@@ -1,5 +1,5 @@
 class Walls {
-    thickness = scale
+    thickness = gameConfig.scale
     topWall = { x: 0, y: 0, width: width / 2, height: this.thickness };
     bottomWall = { x: 0, y: height - this.thickness, width: width / 2, height: this.thickness };
     leftWall = { x: 0, y: 0, width: this.thickness, height: height };

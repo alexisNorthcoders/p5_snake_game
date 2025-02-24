@@ -7,13 +7,11 @@ function playChompSound() {
 let showGrid = false;
 let players = {};
 let audioStarted = false;
-let scale;
 let key;
 let gameStarted = false;
 let gamePaused = false
 let fps = 10
 let collision = false
-let side
 let drawWalls = false
 let score = 0
 let scoreMultiplier = 2
@@ -22,10 +20,17 @@ let lastType
 let isSameType = false
 let disableFood = false
 let name
+
 const foodConfig = {
   types: ['super', 'normal'],
   storage: [],
   quantity: 0
+}
+const gameConfig = {
+  cols: 0,
+  rows: 0,
+  scale: 0,
+  side: 0
 }
 
 socket.onopen = () => {
@@ -42,17 +47,12 @@ socket.onopen = () => {
     event: "newPlayer",
     player: { name }
   }));
+  socket.send(JSON.stringify({
+    event: "getConfig"
+  }));
 };
 
 function setup() {
-  side = min(windowWidth, windowHeight)
-  scale = side / 20
-  foodConfig.quantity = floor(scale / 4)
-  createCanvas(side, side);
-  players
-  snake = new Snake()
-  frameRate(fps)
-  walls = new Walls()
   socket.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
@@ -72,6 +72,13 @@ function setup() {
         case "playerDisconnected":
           delete players[data.player.name];
           break;
+        case "food":
+          players[data.player.name] = { ...data.player, snake: new Snake() };
+          break;
+        case "config":
+          console.log(data)
+          loadConfig(gameConfig, data.config)
+          break;
 
         default:
           console.warn("Unknown event received:", data);
@@ -80,6 +87,26 @@ function setup() {
       console.error("Error parsing message:", error);
     }
   };
+
+  players
+  snake = new Snake()
+
+  walls = new Walls()
+
+}
+
+function loadConfig(gameConfig, data) {
+
+  gameConfig.side = data.side
+  gameConfig.scale = gameConfig.side / 20
+  gameConfig.cols = gameConfig.side / gameConfig.scale
+  gameConfig.rows = gameConfig.side / gameConfig.scale
+  fps = data.fps
+  createCanvas(gameConfig.side, gameConfig.side);
+  frameRate(fps)
+  foodConfig.quantity = floor(gameConfig.scale / 4)
+  showStartScreen()
+
 }
 function getRandomColor() {
   const r = Math.floor(Math.random() * 256);
@@ -143,7 +170,7 @@ function draw() {
 }
 
 function windowResized() {
-  resizeCanvasToFitWindow();
+  // resizeCanvasToFitWindow();
 }
 function keyPressed() {
 
@@ -203,11 +230,10 @@ function spawnOneFood() {
     return
   }
   const type = foodConfig.types[floor(random(0, 3))]
-  const cols = floor(width / scale)
-  const rows = floor(height / scale)
-  return new Food(floor(random(1, cols - 1)) * scale, floor(random(1, rows - 1)) * scale, type)
+  return new Food(floor(random(1, gameConfig.cols - 1)) * gameConfig.scale, floor(random(1, gameConfig.rows - 1)) * gameConfig.scale, type)
 }
 function spawnFood() {
+
   foodConfig.storage.length = 0
   for (let i = 0; i < foodConfig.quantity; i++) {
     foodConfig.storage.push(spawnOneFood())
@@ -216,8 +242,8 @@ function spawnFood() {
 function drawGrid() {
   stroke('white');
   strokeWeight(0.05);
-  for (let x = 0; x < width; x += scale) {
-    for (let y = 0; y < height; y += scale) {
+  for (let x = 0; x < width; x += gameConfig.scale) {
+    for (let y = 0; y < height; y += gameConfig.scale) {
       line(x, 0, x, height);
       line(0, y, width, y);
     }
@@ -230,24 +256,23 @@ function resizeCanvasToFitWindow() {
 }
 function showStartScreen() {
   getUserScore(1)
-  side = min(windowWidth, windowHeight)
   noStroke();
   fill(32);
-  rect(10, 10, side - 20, side - 20, scale);
+  rect(10, 10, gameConfig.side - 20, gameConfig.side - 20, gameConfig.scale);
   fill(255);
   text(
     'Key buttons: \n1 Draw walls. \n2 Draw grid. \n+ Increase framerate  \n- Decrease framerate \nEnter Pause game \nR Restart',
-    side / 2,
-    3 * scale
+    gameConfig.side / 2,
+    3 * gameConfig.scale
   );
   textAlign(CENTER, CENTER)
 
-  textSize(scale)
+  textSize(gameConfig.scale)
 
   text(
     'Click to play.\nUse arrow keys or WASD to move.',
-    side / 2,
-    side / 2
+    gameConfig.side / 2,
+    gameConfig.side / 2
   );
   noLoop();
 }
@@ -275,21 +300,19 @@ function pauseGame() {
   gamePaused ? noLoop() : loop()
 }
 function showPauseScreen() {
-  let side = min(windowWidth, windowHeight)
   noStroke();
   fill(0, 127);
-  rect(10, side / 2 - scale, side - 20, 2 * scale, scale);
+  rect(10, gameConfig.side / 2 - scale, gameConfig.side - 20, 2 * scale, scale);
   fill(255);
   textAlign(CENTER, CENTER)
   textSize(scale)
   text(
     'Game paused...',
-    side / 2,
-    side / 2
+    gameConfig.side / 2,
+    gameConfig.side / 2
   );
 }
 function showScore() {
-  let side = min(windowWidth, windowHeight)
   stroke('black');
   strokeWeight(2)
   fill(255);
@@ -297,8 +320,8 @@ function showScore() {
   textSize(scale)
   text(
     `Score: ${score}`,
-    side / 2,
-    scale * 1.2
+    gameConfig.side / 2,
+    gameConfig.scale * 1.2
   );
 }
 

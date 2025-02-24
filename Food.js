@@ -20,7 +20,7 @@ class Food {
             stroke('green');
             fill('black')
         }
-        circle(this.x + scale / 2, this.y + scale / 2, scale / 2)
+        circle(this.x + gameConfig.scale / 2, this.y + gameConfig.scale / 2, gameConfig.scale / 2)
     }
     update() {
         this.keyframe++

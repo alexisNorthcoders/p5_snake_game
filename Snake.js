@@ -2,8 +2,8 @@ class Snake {
     constructor(x = 2, y = 4, type = 'player') {
         this.type = type
         this.start = { x, y }
-        this.x = x * scale
-        this.y = y * scale
+        this.x = x * gameConfig.scale
+        this.y = y * gameConfig.scale
 
         this.colors =
         {
@@ -33,7 +33,7 @@ class Snake {
     }
     eat(food) {
         let distance = dist(this.x, this.y, food.x, food.y)
-        if (distance < scale / 2) {
+        if (distance < gameConfig.scale / 2) {
             if (food.type === 'super') {
                 this.superGrow(2)
                 playChompSound()
@@ -68,20 +68,20 @@ class Snake {
 
         this.tail[this.size - 1] = createVector(this.x, this.y) //when I am done moving I want the last spot to create Vector on the tail equals to current location of snake
 
-        this.x = this.x + this.speed.x * scale;
-        this.y = this.y + this.speed.y * scale;
+        this.x = this.x + this.speed.x * gameConfig.scale;
+        this.y = this.y + this.speed.y * gameConfig.scale;
 
-        if (this.x > Number(side)) {
+        if (this.x > Number(gameConfig.side)) {
             this.x = 0
         }
         if (this.x < 0) {
-            this.x = side
+            this.x = gameConfig.side
         }
-        if (this.y > Number(side)) {
+        if (this.y > Number(gameConfig.side)) {
             this.y = 0
         }
         if (this.y < 0) {
-            this.y = side
+            this.y = gameConfig.side
         }
         this.keyPressedThisFrame++;
     }
@@ -95,20 +95,20 @@ class Snake {
             let segment = this.tail[i];
             fill(bodyColor);
             strokeWeight(2);
-            square(segment.x, segment.y, scale);
+            square(segment.x, segment.y, gameConfig.scale);
         }
 
         // Draw head
         strokeWeight(2);
         fill(this.colors[this.type].head);
-        circle(this.x + scale / 2, this.y + scale / 2, scale);
+        circle(this.x + gameConfig.scale / 2, this.y + gameConfig.scale / 2, gameConfig.scale);
 
         // Draw eyes
         fill(this.colors[this.type].eyes);
         stroke('yellow');
         strokeWeight(1);
-        rect(this.x + 3 * scale / 5, this.y, scale / 5);
-        rect(this.x + scale / 5, this.y, scale / 5);
+        rect(this.x + 3 * gameConfig.scale / 5, this.y, gameConfig.scale / 5);
+        rect(this.x + gameConfig.scale / 5, this.y, gameConfig.scale / 5);
     }
     snakeKey(key) {
         if (this.keyPressedThisFrame < 1 || this.isDead) {
@@ -158,11 +158,11 @@ class Snake {
         await postUserScore(1)
         this.isDead = false
         this.resetColors()
-        this.x = this.start.x * scale
-        this.y = this.start.y * scale
+        this.x = this.start.x * gameConfig.scale
+        this.y = this.start.y * gameConfig.scale
         this.tail = []
         this.size = 0
-        this.speed = { x: 1 / scale / 0.2, y: 0 };
+        this.speed = { x: 1 / gameConfig.scale / 0.2, y: 0 };
         this.direction(1, 0)
 
     }
