@@ -1,9 +1,71 @@
-const socket = new WebSocket("ws://raspberrypi.local:4001/ws");
+let socket;
+let reconnectTimeout;
+let retryCount = 0;
+const maxRetries = 10;
+let connected = false;
+let gameConfigured = false;
+
+function connectWebSocket() {
+  if (retryCount >= maxRetries) {
+    console.error("❌ Maximum retry attempts reached. Stopping WebSocket reconnection.");
+    return;
+  }
+
+  console.log(`🔄 Attempting WebSocket connection... (Attempt ${retryCount + 1}/${maxRetries})`);
+
+  socket = new WebSocket("ws://raspberrypi.local:4001/ws");
+
+  socket.onopen = () => {
+    connected = true;
+    console.log("✅ Connected to WebSocket server");
+    retryCount = 0;
+    clearTimeout(reconnectTimeout);
+
+    name = localStorage.getItem("username") || prompt("What is your name?");
+
+    if (!localStorage.getItem("username")) {
+      localStorage.setItem("username", name);
+    }
+
+    console.log(`You joined as ${name}`);
+    socket.send(JSON.stringify({
+      event: "newPlayer",
+      player: { name }
+    }));
+    socket.send(JSON.stringify({
+      event: "getConfig"
+    }));
+  };
+
+  socket.onerror = (error) => {
+    console.error("❌ WebSocket connection failed, retrying in 3 seconds...", error);
+    retryConnection();
+  };
+
+  socket.onclose = () => {
+    console.warn("⚠️ WebSocket disconnected, attempting to reconnect...");
+    retryConnection();
+  };
+}
+
+function retryConnection() {
+  if (reconnectTimeout) return;
+
+  retryCount++;
+  reconnectTimeout = setTimeout(() => {
+    reconnectTimeout = null;
+    connectWebSocket();
+  }, 3000);
+}
+
+// Start WebSocket connection
+connectWebSocket();
 
 function playChompSound() {
   let chompSound = new Audio('assets/sound/chomp.mp3');
   chompSound.play();
 }
+
 let showGrid = false;
 let players = {};
 let audioStarted = false;
@@ -34,25 +96,6 @@ const gameConfig = {
   side: 0
 }
 
-socket.onopen = () => {
-  console.log("Connected to WebSocket server");
-
-  name = localStorage.getItem("username") || prompt("What is your name?");
-
-  if (!localStorage.getItem("username")) {
-    localStorage.setItem("username", name);
-  }
-
-  console.log(`You joined as ${name}`);
-  socket.send(JSON.stringify({
-    event: "newPlayer",
-    player: { name }
-  }));
-  socket.send(JSON.stringify({
-    event: "getConfig"
-  }));
-};
-
 function setup() {
   socket.onmessage = (event) => {
     try {
@@ -77,7 +120,8 @@ function setup() {
           players[data.player.name] = { ...data.player, snake: new Snake() };
           break;
         case "config":
-          loadConfig(gameConfig, data)
+          gameConfigured = true;
+          loadConfig(gameConfig, data);
           break;
         case "spawnFood":
           const { food } = data
@@ -92,9 +136,6 @@ function setup() {
       console.error("Error parsing message:", error);
     }
   };
-
-  players
-  snake = new Snake()
 
   walls = new Walls()
 
@@ -123,6 +164,7 @@ function getRandomColor() {
   return `rgb(${r}, ${g}, ${b})`;
 }
 function draw() {
+  if (!connected || !gameConfigured) return;
 
   background('tan');
   if (showGrid) drawGrid();
@@ -185,7 +227,7 @@ function windowResized() {
 }
 function keyPressed() {
 
-  if (gameStarted === false) {
+  if (!gameStarted && gameConfigured && connected) {
     startGame();
   }
   switch (keyCode) {
@@ -285,21 +327,17 @@ function showStartScreen() {
   );
   noLoop();
 }
-function mousePressed() {
-  if (gameStarted === false) {
-    startGame();
-  }
-}
+
 function startGame() {
-  spawnFood()
-  gameStarted = true
-  showScore()
-  loop();
+  if (connected && gameConfigured) {
+    spawnFood()
+    gameStarted = true
+    showScore()
+    loop();
+  }
 }
 async function restartGame() {
   console.log('Reseting game...')
-  await snake.reset()
-  await pcSnake.reset()
   score = 0;
   spawnFood()
   loop();
