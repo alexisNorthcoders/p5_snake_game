@@ -1,7 +1,7 @@
 class Food {
     constructor(col, row, type = 'normal') {
-        this.x = col
-        this.y = row
+        this.x = col * gameConfig.scale
+        this.y = row * gameConfig.scale
         this.type = type
         this.keyframe = 0
     }

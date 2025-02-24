@@ -24,7 +24,8 @@ let name
 const foodConfig = {
   types: ['super', 'normal'],
   storage: [],
-  quantity: 0
+  quantity: 0,
+  coordinates: []
 }
 const gameConfig = {
   cols: 0,
@@ -76,8 +77,12 @@ function setup() {
           players[data.player.name] = { ...data.player, snake: new Snake() };
           break;
         case "config":
-          console.log(data)
-          loadConfig(gameConfig, data.config)
+          loadConfig(gameConfig, data)
+          break;
+        case "spawnFood":
+          const { food } = data
+          const [col, row] = food[0]
+          spawnOneFood(col, row)
           break;
 
         default:
@@ -97,14 +102,17 @@ function setup() {
 
 function loadConfig(gameConfig, data) {
 
-  gameConfig.side = data.side
+  const { config, food } = data
+
+  gameConfig.side = config.side
   gameConfig.scale = gameConfig.side / 20
   gameConfig.cols = gameConfig.side / gameConfig.scale
   gameConfig.rows = gameConfig.side / gameConfig.scale
-  fps = data.fps
+  foodConfig.coordinates = food
+  foodConfig.quantity = food.length
+  fps = config.fps
   createCanvas(gameConfig.side, gameConfig.side);
   frameRate(fps)
-  foodConfig.quantity = floor(gameConfig.scale / 4)
   showStartScreen()
 
 }
@@ -143,7 +151,10 @@ function draw() {
               score += 2 * lastScores
               lastScores = 0
             }
-            foodConfig.storage[i] = spawnOneFood()
+            socket.send(JSON.stringify({
+              event: "spawnFood"
+            }));
+            foodConfig.storage.splice(i, 1)
           }
 
           food.draw()
@@ -225,19 +236,17 @@ function keyPressed() {
   }
 
 }
-function spawnOneFood() {
-  if (disableFood) {
-    return
-  }
-  const type = foodConfig.types[floor(random(0, 3))]
-  return new Food(floor(random(1, gameConfig.cols - 1)) * gameConfig.scale, floor(random(1, gameConfig.rows - 1)) * gameConfig.scale, type)
-}
+
 function spawnFood() {
 
-  foodConfig.storage.length = 0
   for (let i = 0; i < foodConfig.quantity; i++) {
-    foodConfig.storage.push(spawnOneFood())
+    const [col, row] = foodConfig.coordinates[i]
+    foodConfig.storage.push(new Food(col, row))
   }
+}
+function spawnOneFood(col, row) {
+  foodConfig.storage.push(new Food(col, row))
+
 }
 function drawGrid() {
   stroke('white');
