@@ -61,9 +61,11 @@ This is a multiplayer Snake game that connects players through a WebSocket serve
 - `POST /snake/score/{userId}` - Submit a new score.
 
 ## TODO
-- Move start game logic to server
-- Move food spawn logic to server
-- Add waiting room for players
+- ✅ Move start game logic to server  
+- ✅ Move food spawn logic to server
+- ✅ Add waiting room for players
+- Send game config when game starts - food position and players starting position
+- Move player position logic to the server?
 - Allow multiple rooms
 - Allow for single game mode / local multiplayer only
 - Single game mode features only ( framerate, canvas resize, etc)
