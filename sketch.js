@@ -4,6 +4,8 @@ let retryCount = 0;
 const maxRetries = 10;
 let connected = false;
 let gameConfigured = false;
+let waitingRoom = true;
+let minPlayers = 1;
 
 function connectWebSocket() {
   if (retryCount >= maxRetries) {
@@ -35,6 +37,10 @@ function connectWebSocket() {
     socket.send(JSON.stringify({
       event: "getConfig"
     }));
+
+    socket.send(JSON.stringify({
+      event: "waitingRoomStatus"
+    }));
   };
 
   socket.onerror = (error) => {
@@ -42,10 +48,10 @@ function connectWebSocket() {
     retryConnection();
   };
 
-  socket.onclose = () => {
+  /* socket.onclose = () => {
     console.warn("⚠️ WebSocket disconnected, attempting to reconnect...");
     retryConnection();
-  };
+  }; */
 }
 
 function retryConnection() {
@@ -102,10 +108,14 @@ function setup() {
       const data = JSON.parse(event.data);
 
       switch (data.event) {
-        case "newPlayer":
-          players[data.player.name] = { ...data.player, snake: new Snake() };
+        case "waitingRoomStatus":
+          console.log("waitingRoomStatus", data)
+          data.players.forEach((player) => players[player.name] = { ...player, snake: new Snake() })
           break;
-
+        case "startGame":
+          waitingRoom = false;
+          startGame();
+          break;
         case "playerMovement":
           if (players[data.player.name]) {
             console.log(`Player: ${data.player.name}, Key: ${data.key}`)
@@ -167,6 +177,11 @@ function draw() {
   if (!connected || !gameConfigured) return;
 
   background('tan');
+
+  if (waitingRoom) {
+    showWaitingRoom();
+    return;
+  }
   if (showGrid) drawGrid();
   if (!gameStarted) {
     showStartScreen()
@@ -221,15 +236,28 @@ function draw() {
 
 
 }
-
+function showWaitingRoom() {
+  noStroke();
+  fill(32);
+  rect(10, 10, gameConfig.side - 20, gameConfig.side - 20, gameConfig.scale);
+  fill(255);
+  textSize(gameConfig.scale);
+  textAlign(CENTER, CENTER);
+  text(
+    `Waiting for players... (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
+    gameConfig.side / 2,
+    gameConfig.side / 2
+  );
+}
 function windowResized() {
   // resizeCanvasToFitWindow();
 }
 function keyPressed() {
-
-  if (!gameStarted && gameConfigured && connected) {
-    startGame();
+  // press Enter to start game
+  if (waitingRoom && keyCode === ENTER && Object.keys(players).length >= minPlayers) {
+    socket.send(JSON.stringify({ event: "startGame" }));
   }
+
   switch (keyCode) {
     case 49:
       drawWalls = !drawWalls
