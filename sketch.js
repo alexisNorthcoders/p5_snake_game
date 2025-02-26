@@ -6,6 +6,8 @@ let connected = false;
 let gameConfigured = false;
 let waitingRoom = true;
 let minPlayers = 1;
+let pingValue = 0
+let uiCanvas
 
 function connectWebSocket() {
   if (retryCount >= maxRetries) {
@@ -41,6 +43,7 @@ function connectWebSocket() {
     socket.send(JSON.stringify({
       event: "waitingRoomStatus"
     }));
+    measurePing();
   };
 
   socket.onerror = (error) => {
@@ -70,6 +73,11 @@ connectWebSocket();
 function playChompSound() {
   let chompSound = new Audio('assets/sound/chomp.mp3');
   chompSound.play();
+}
+
+function measurePing() {
+  startTime = Date.now();
+  socket.send(JSON.stringify({ event: "ping" }))
 }
 
 let showGrid = false;
@@ -103,11 +111,16 @@ const gameConfig = {
 }
 
 function setup() {
+
   socket.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
 
       switch (data.event) {
+        case "pong":
+          pingValue = Date.now() - startTime;
+          setTimeout(measurePing, 1000);
+          break
         case "waitingRoomStatus":
           console.log("waitingRoomStatus", data)
           data.players.forEach((player) => players[player.name] = { ...player, snake: new Snake() })
@@ -162,7 +175,8 @@ function loadConfig(gameConfig, data) {
   foodConfig.coordinates = food
   foodConfig.quantity = food.length
   fps = config.fps
-  createCanvas(gameConfig.side, gameConfig.side);
+  createCanvas(gameConfig.side + 200, gameConfig.side);
+  uiCanvas = createGraphics(200, gameConfig.side);
   frameRate(fps)
   showStartScreen()
 
@@ -187,7 +201,7 @@ function draw() {
     showStartScreen()
   }
   else {
-    showScore()
+
     for (let playerName in players) {
       const snake = players[playerName].snake
       snake.update();
@@ -220,6 +234,10 @@ function draw() {
       }
     }
     drawWalls ? walls.draw() : null
+
+    drawUIBox()
+    /*  showPing()
+     showScore() */
 
     const hasCollided = false //walls.checkCollision(snake);
     if (hasCollided && collision) {
@@ -294,7 +312,7 @@ function keyPressed() {
       key = 'RIGHT'
       break;
     case ENTER:
-      pauseGame()
+      if (gameStarted) pauseGame()
       break;
   }
   if (socket.readyState === WebSocket.OPEN) {
@@ -392,12 +410,51 @@ function showScore() {
   strokeWeight(2)
   fill(255);
   textAlign(CENTER, CENTER)
-  textSize(scale)
+  textSize(gameConfig.scale)
   text(
     `Score: ${score}`,
     gameConfig.side / 2,
     gameConfig.scale * 1.2
   );
+}
+function showPing() {
+  stroke('black');
+  strokeWeight(2)
+  fill(255);
+  textSize(gameConfig.scale / 2);
+  textAlign(LEFT, TOP);
+  text(`Ping: ${pingValue}ms`, 5, 5);
+}
+
+
+function drawUIBox() {
+  uiCanvas.clear();
+
+  // Background with gradient effect
+  
+  let gradient = uiCanvas.drawingContext.createLinearGradient(0, 0, 0, uiCanvas.height);
+  gradient.addColorStop(0, "blue");
+  gradient.addColorStop(1, "purple");
+  uiCanvas.drawingContext.fillStyle = gradient;
+  uiCanvas.rect(0, 0, uiCanvas.width, uiCanvas.height);
+  
+
+  // Text & UI Glow Effect
+  uiCanvas.fill("green");
+  uiCanvas.textSize(16);
+  uiCanvas.textAlign(LEFT, CENTER);
+  
+  uiCanvas.text(`⚡ SCORE: ${score}`, 20, 50);
+  uiCanvas.text(`🔧 PING: ${pingValue}ms`, 20, 90);
+  uiCanvas.text(`🎮 FPS: ${fps}`, 20, 130);
+
+  // Glowing Frame
+  uiCanvas.strokeWeight(4);
+  uiCanvas.stroke("yellow");
+  uiCanvas.noFill();
+  uiCanvas.rect(10, 10, uiCanvas.width - 20, uiCanvas.height - 20, 10);
+
+  image(uiCanvas, width - uiCanvas.width, 0);
 }
 
 function playSound(frequency, duration) {

@@ -64,6 +64,9 @@ This is a multiplayer Snake game that connects players through a WebSocket serve
 - ✅ Move start game logic to server  
 - ✅ Move food spawn logic to server
 - ✅ Add waiting room for players
+- ✅ Add ping counter
+- Move pause game logic to server
+- Add score logic to the server
 - Send game config when game starts - food position and players starting position
 - Move player position logic to the server?
 - Allow multiple rooms
