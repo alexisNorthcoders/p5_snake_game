@@ -8,6 +8,7 @@ let waitingRoom = true;
 let minPlayers = 1;
 let pingValue = 0
 let uiCanvas
+let offset = 200
 
 function connectWebSocket() {
   if (retryCount >= maxRetries) {
@@ -175,8 +176,8 @@ function loadConfig(gameConfig, data) {
   foodConfig.coordinates = food
   foodConfig.quantity = food.length
   fps = config.fps
-  createCanvas(gameConfig.side + 200, gameConfig.side);
-  uiCanvas = createGraphics(200, gameConfig.side);
+  createCanvas(gameConfig.side + offset, gameConfig.side);
+  uiCanvas = createGraphics(offset, gameConfig.side);
   frameRate(fps)
   showStartScreen()
 
@@ -193,6 +194,7 @@ function draw() {
   background('tan');
 
   if (waitingRoom) {
+    drawUIBox()
     showWaitingRoom();
     return;
   }
@@ -236,8 +238,6 @@ function draw() {
     drawWalls ? walls.draw() : null
 
     drawUIBox()
-    /*  showPing()
-     showScore() */
 
     const hasCollided = false //walls.checkCollision(snake);
     if (hasCollided && collision) {
@@ -257,13 +257,13 @@ function draw() {
 function showWaitingRoom() {
   noStroke();
   fill(32);
-  rect(10, 10, gameConfig.side - 20, gameConfig.side - 20, gameConfig.scale);
+  rect(10 + offset, 10, gameConfig.side - 20, gameConfig.side - 20, gameConfig.scale);
   fill(255);
   textSize(gameConfig.scale);
   textAlign(CENTER, CENTER);
   text(
     `Waiting for players... (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
-    gameConfig.side / 2,
+    gameConfig.side / 2 + offset,
     gameConfig.side / 2
   );
 }
@@ -430,31 +430,31 @@ function showPing() {
 function drawUIBox() {
   uiCanvas.clear();
 
-  // Background with gradient effect
-  
-  let gradient = uiCanvas.drawingContext.createLinearGradient(0, 0, 0, uiCanvas.height);
-  gradient.addColorStop(0, "blue");
-  gradient.addColorStop(1, "purple");
-  uiCanvas.drawingContext.fillStyle = gradient;
-  uiCanvas.rect(0, 0, uiCanvas.width, uiCanvas.height);
-  
+  // Background
 
-  // Text & UI Glow Effect
-  uiCanvas.fill("green");
+  uiCanvas.fill("#F5DEB3")
+  uiCanvas.rect(0, 0, uiCanvas.width, uiCanvas.height)
+
+  // Text
+  uiCanvas.noStroke();
+  uiCanvas.fill("black");
   uiCanvas.textSize(16);
   uiCanvas.textAlign(LEFT, CENTER);
-  
+
   uiCanvas.text(`⚡ SCORE: ${score}`, 20, 50);
   uiCanvas.text(`🔧 PING: ${pingValue}ms`, 20, 90);
   uiCanvas.text(`🎮 FPS: ${fps}`, 20, 130);
+  Object.keys(players).forEach((player, i) => uiCanvas.text(`🎮 Player #${i + 1}: ${player}`, 20, 170 + 40 * i))
 
-  // Glowing Frame
+
+  // Frame
   uiCanvas.strokeWeight(4);
-  uiCanvas.stroke("yellow");
+  uiCanvas.stroke(" #7D7D7D");
   uiCanvas.noFill();
   uiCanvas.rect(10, 10, uiCanvas.width - 20, uiCanvas.height - 20, 10);
 
-  image(uiCanvas, width - uiCanvas.width, 0);
+  image(uiCanvas, 0, 0);
+  loop()
 }
 
 function playSound(frequency, duration) {

@@ -1,8 +1,8 @@
 class Snake {
-    constructor(x = 2, y = 4, type = 'player') {
+    constructor(x = 2 + offset, y = 4, type = 'player') {
         this.type = type
         this.start = { x, y }
-        this.x = x * gameConfig.scale
+        this.x = x * gameConfig.scale + offset
         this.y = y * gameConfig.scale
 
         this.colors =
@@ -71,11 +71,11 @@ class Snake {
         this.x = this.x + this.speed.x * gameConfig.scale;
         this.y = this.y + this.speed.y * gameConfig.scale;
 
-        if (this.x > Number(gameConfig.side)) {
-            this.x = 0
+        if (this.x > Number(gameConfig.side) + offset) {
+            this.x = 0 + offset
         }
-        if (this.x < 0) {
-            this.x = gameConfig.side
+        if (this.x < 0 + offset) {
+            this.x = gameConfig.side + offset
         }
         if (this.y > Number(gameConfig.side)) {
             this.y = 0
@@ -158,7 +158,7 @@ class Snake {
         await postUserScore(1)
         this.isDead = false
         this.resetColors()
-        this.x = this.start.x * gameConfig.scale
+        this.x = this.start.x * gameConfig.scale + offset
         this.y = this.start.y * gameConfig.scale
         this.tail = []
         this.size = 0

@@ -1,6 +1,6 @@
 class Food {
     constructor(col, row, type = 'normal') {
-        this.x = col * gameConfig.scale
+        this.x = col * gameConfig.scale + offset
         this.y = row * gameConfig.scale
         this.type = type
         this.keyframe = 0
