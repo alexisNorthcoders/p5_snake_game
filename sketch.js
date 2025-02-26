@@ -97,6 +97,7 @@ let lastType
 let isSameType = false
 let disableFood = false
 let name
+let walls
 
 const foodConfig = {
   types: ['super', 'normal'],
@@ -161,8 +162,6 @@ function setup() {
     }
   };
 
-  walls = new Walls()
-
 }
 
 function loadConfig(gameConfig, data) {
@@ -176,6 +175,8 @@ function loadConfig(gameConfig, data) {
   foodConfig.coordinates = food
   foodConfig.quantity = food.length
   fps = config.fps
+  walls = new Walls()
+
   createCanvas(gameConfig.side + offset, gameConfig.side);
   uiCanvas = createGraphics(offset, gameConfig.side);
   frameRate(fps)
@@ -444,7 +445,7 @@ function drawUIBox() {
   uiCanvas.text(`⚡ SCORE: ${score}`, 20, 50);
   uiCanvas.text(`🔧 PING: ${pingValue}ms`, 20, 90);
   uiCanvas.text(`🎮 FPS: ${fps}`, 20, 130);
-  Object.keys(players).forEach((player, i) => uiCanvas.text(`🎮 Player #${i + 1}: ${player}`, 20, 170 + 40 * i))
+  Object.keys(players).forEach((player, i) => uiCanvas.text(`🧑 Player #${i + 1}: ${player}`, 20, 170 + 40 * i))
 
 
   // Frame
