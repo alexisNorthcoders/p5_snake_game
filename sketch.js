@@ -9,6 +9,35 @@ let minPlayers = 1;
 let pingValue = 0
 let uiCanvas
 let offset = 200
+let showGrid = false;
+let players = {};
+let audioStarted = false;
+let key;
+let gameStarted = false;
+let gamePaused = false
+let playerId
+let fps = 10
+let collision = false
+let drawWalls = false
+let score = 0
+let scoreMultiplier = 2
+let lastScores = 0
+let lastType
+let isSameType = false
+let disableFood = false
+let name
+let walls
+
+const getWebSocketUrl = () => {
+  if (window.location.hostname === "raspberrypi.local") {
+    return "ws://raspberrypi.local:4002/ws";
+  } else if (window.location.hostname === "alexisraspberry.duckdns.org") {
+    return "wss://alexisraspberry.duckdns.org/ws";
+  } else {
+    console.error("Unknown hostname, defaulting to secure WebSocket");
+    return "wss://alexisraspberry.duckdns.org/ws";
+  }
+};
 
 function connectWebSocket() {
   if (retryCount >= maxRetries) {
@@ -18,8 +47,8 @@ function connectWebSocket() {
 
   console.log(`🔄 Attempting WebSocket connection... (Attempt ${retryCount + 1}/${maxRetries})`);
 
-  socket = new WebSocket("ws://raspberrypi.local:4001/ws");
-
+  socket = new WebSocket(getWebSocketUrl());
+  //socket = new WebSocket("ws://raspberrypi.local:4002/ws");
   socket.onopen = () => {
     connected = true;
     console.log("✅ Connected to WebSocket server");
@@ -28,6 +57,10 @@ function connectWebSocket() {
 
     name = localStorage.getItem("username") || prompt("What is your name?");
 
+    // Generate or retrieve a unique player ID
+    playerId = localStorage.getItem("playerId") || randomId();
+    localStorage.setItem("playerId", playerId);
+
     if (!localStorage.getItem("username")) {
       localStorage.setItem("username", name);
     }
@@ -35,7 +68,7 @@ function connectWebSocket() {
     console.log(`You joined as ${name}`);
     socket.send(JSON.stringify({
       event: "newPlayer",
-      player: { name }
+      player: { name, id: playerId }
     }));
     socket.send(JSON.stringify({
       event: "getConfig"
@@ -81,24 +114,6 @@ function measurePing() {
   socket.send(JSON.stringify({ event: "ping" }))
 }
 
-let showGrid = false;
-let players = {};
-let audioStarted = false;
-let key;
-let gameStarted = false;
-let gamePaused = false
-let fps = 10
-let collision = false
-let drawWalls = false
-let score = 0
-let scoreMultiplier = 2
-let lastScores = 0
-let lastType
-let isSameType = false
-let disableFood = false
-let name
-let walls
-
 const foodConfig = {
   types: ['super', 'normal'],
   storage: [],
@@ -125,28 +140,32 @@ function setup() {
           break
         case "waitingRoomStatus":
           console.log("waitingRoomStatus", data)
-          data.players.forEach((player) => players[player.name] = { ...player, snake: new Snake() })
+          data.players.forEach((player) => players[player.id] = { ...player, snake: new Snake() })
           break;
         case "startGame":
           waitingRoom = false;
           startGame();
           break;
         case "playerMovement":
-          if (players[data.player.name]) {
+          if (data.player.name === 'Server') {
             console.log(`Player: ${data.player.name}, Key: ${data.key}`)
-            players[data.player.name].snake.snakeKey(data.key)
+            players[data.player.id].snake.snakeKey(data.key)
+          }
+          else if (players[data.player.id]) {
+            console.log(`Player: ${data.player.name}, Key: ${data.key}`)
+            players[data.player.id].snake.position(data.player.snake)
+            players[data.player.id].snake.snakeKey(data.key)
           }
           break;
 
         case "playerDisconnected":
-          delete players[data.player.name];
+          delete players[data.player.id];
           break;
         case "food":
-          players[data.player.name] = { ...data.player, snake: new Snake() };
+          players[data.player.id] = { ...data.player, snake: new Snake() };
           break;
         case "config":
-          gameConfigured = true;
-          loadConfig(gameConfig, data);
+          if (!gameConfigured) loadConfig(gameConfig, data);
           break;
         case "spawnFood":
           const { food } = data
@@ -165,6 +184,8 @@ function setup() {
 }
 
 function loadConfig(gameConfig, data) {
+
+  gameConfigured = true;
 
   const { config, food } = data
 
@@ -205,12 +226,14 @@ function draw() {
   }
   else {
 
-    for (let playerName in players) {
-      const snake = players[playerName].snake
+    for (let id in players) {
+      console.log(playerId)
+      const snake = players[id].snake
       snake.update();
       snake.draw();
       snake.death();
       if (!disableFood) {
+
         foodConfig.storage.forEach((food, i) => {
           if (snake.eat(food)) {
             if (lastType === food.type) {
@@ -225,9 +248,11 @@ function draw() {
               score += 2 * lastScores
               lastScores = 0
             }
-            socket.send(JSON.stringify({
-              event: "spawnFood"
-            }));
+            if (id === playerId) {
+              socket.send(JSON.stringify({
+                event: "spawnFood"
+              }));
+            }
             foodConfig.storage.splice(i, 1)
           }
 
@@ -319,7 +344,14 @@ function keyPressed() {
   if (socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({
       event: "playerMovement",
-      player: { name },
+      player: {
+        name,
+        id: playerId,
+        snake: {
+          x: players[playerId].snake.x,
+          y: players[playerId].snake.y
+        }
+      },
       key
     }));
   }
@@ -445,7 +477,7 @@ function drawUIBox() {
   uiCanvas.text(`⚡ SCORE: ${score}`, 20, 50);
   uiCanvas.text(`🔧 PING: ${pingValue}ms`, 20, 90);
   uiCanvas.text(`🎮 FPS: ${fps}`, 20, 130);
-  Object.keys(players).forEach((player, i) => uiCanvas.text(`🧑 Player #${i + 1}: ${player}`, 20, 170 + 40 * i))
+  Object.keys(players).forEach((key, i) => uiCanvas.text(`🧑 Player #${i + 1}: ${players[key].name}`, 20, 170 + 40 * i))
 
 
   // Frame

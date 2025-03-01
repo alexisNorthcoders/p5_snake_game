@@ -3,7 +3,11 @@
 ## Overview
 This is a multiplayer Snake game that connects players through a WebSocket server (https://github.com/alexisNorthcoders/go-ws). Players control their own snakes, collect food, and compete for the highest score. The game features walls, adjustable framerate, and different food types that affect scoring.
 
+First version - single player
 ![alt text](image.png)
+
+Multiplayer
+![alt text](multiplayer.png)
 
 ## Features
 - Multiplayer support via WebSockets

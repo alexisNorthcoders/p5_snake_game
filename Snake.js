@@ -31,6 +31,10 @@ class Snake {
         this.speed.x = x;
         this.speed.y = y;
     }
+    position({ x, y }) {
+        this.x = x
+        this.y = y
+    }
     eat(food) {
         let distance = dist(this.x, this.y, food.x, food.y)
         if (distance < gameConfig.scale / 2) {
