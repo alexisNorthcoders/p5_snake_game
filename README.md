@@ -69,6 +69,9 @@ Multiplayer
 - ✅ Move food spawn logic to server
 - ✅ Add waiting room for players
 - ✅ Add ping counter
+- Set color in waiting room screen server side
+- Add dead status
+- Add tail size in server
 - Send game config when game starts 
    - ✅ food position
    - players starting position
