@@ -48,7 +48,7 @@ function connectWebSocket() {
   console.log(`🔄 Attempting WebSocket connection... (Attempt ${retryCount + 1}/${maxRetries})`);
 
   socket = new WebSocket(getWebSocketUrl());
-  //socket = new WebSocket("ws://raspberrypi.local:4002/ws");
+
   socket.onopen = () => {
     connected = true;
     console.log("✅ Connected to WebSocket server");
@@ -84,50 +84,6 @@ function connectWebSocket() {
     console.error("❌ WebSocket connection failed, retrying in 3 seconds...", error);
     retryConnection();
   };
-
-  /* socket.onclose = () => {
-    console.warn("⚠️ WebSocket disconnected, attempting to reconnect...");
-    retryConnection();
-  }; */
-}
-
-function retryConnection() {
-  if (reconnectTimeout) return;
-
-  retryCount++;
-  reconnectTimeout = setTimeout(() => {
-    reconnectTimeout = null;
-    connectWebSocket();
-  }, 3000);
-}
-
-// Start WebSocket connection
-connectWebSocket();
-
-function playChompSound() {
-  let chompSound = new Audio('assets/sound/chomp.mp3');
-  chompSound.play();
-}
-
-function measurePing() {
-  startTime = Date.now();
-  socket.send(JSON.stringify({ event: "ping" }))
-}
-
-const foodConfig = {
-  types: ['super', 'normal'],
-  storage: [],
-  quantity: 0,
-  coordinates: []
-}
-const gameConfig = {
-  cols: 0,
-  rows: 0,
-  scale: 0,
-  side: 0
-}
-
-function setup() {
 
   socket.onmessage = (event) => {
     try {
@@ -181,6 +137,47 @@ function setup() {
     }
   };
 
+  socket.onclose = () => {
+    console.warn("⚠️ WebSocket disconnected, attempting to reconnect...");
+    retryConnection();
+  };
+}
+
+function retryConnection() {
+  if (reconnectTimeout) return;
+
+  retryCount++;
+  reconnectTimeout = setTimeout(() => {
+    reconnectTimeout = null;
+    connectWebSocket();
+  }, 3000);
+}
+
+function playChompSound() {
+  let chompSound = new Audio('assets/sound/chomp.mp3');
+  chompSound.play();
+}
+
+function measurePing() {
+  startTime = Date.now();
+  socket.send(JSON.stringify({ event: "ping" }))
+}
+
+const foodConfig = {
+  types: ['super', 'normal'],
+  storage: [],
+  quantity: 0,
+  coordinates: []
+}
+const gameConfig = {
+  cols: 0,
+  rows: 0,
+  scale: 0,
+  side: 0
+}
+
+function setup() {
+  connectWebSocket();
 }
 
 function loadConfig(gameConfig, data) {
