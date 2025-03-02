@@ -80,5 +80,7 @@ Multiplayer
 - Single game mode features only ( framerate, canvas resize, etc)
 
 ## Bugs
-- ✅ Food being spawned many times or in not in the same place for all clients - server now updates the position of the food eaten without creating a new food
-- Initial load of the page often times won't connect to the ws and requires refreshing the page ( client or server problem?)
+- ✅ Food being spawned many times or in not in the same place for all clients 
+   - server now updates the position of the food eaten without creating a new food
+- ✅ Initial load of the page often times won't connect to the ws and requires refreshing the page ( client or server problem?)
+   - Fixed by moving socket logic outside of setup()  
