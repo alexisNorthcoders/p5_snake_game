@@ -69,10 +69,16 @@ Multiplayer
 - ✅ Move food spawn logic to server
 - ✅ Add waiting room for players
 - ✅ Add ping counter
+- Send game config when game starts 
+   - ✅ food position
+   - players starting position
 - Move pause game logic to server
 - Add score logic to the server
-- Send game config when game starts - food position and players starting position
 - Move player position logic to the server?
 - Allow multiple rooms
 - Allow for single game mode / local multiplayer only
 - Single game mode features only ( framerate, canvas resize, etc)
+
+## Bugs
+- ✅ Food being spawned many times or in not in the same place for all clients - server now updates the position of the food eaten without creating a new food
+- Initial load of the page often times won't connect to the ws and requires refreshing the page ( client or server problem?)

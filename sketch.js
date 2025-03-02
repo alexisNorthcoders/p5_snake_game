@@ -167,10 +167,10 @@ function setup() {
         case "config":
           if (!gameConfigured) loadConfig(gameConfig, data);
           break;
-        case "spawnFood":
+        case "updateFood":
           const { food } = data
-          const [col, row] = food[0]
-          spawnOneFood(col, row)
+          const [col, row, id] = food[0]
+          updateFood(col, row, id)
           break;
 
         default:
@@ -188,6 +188,8 @@ function loadConfig(gameConfig, data) {
   gameConfigured = true;
 
   const { config, food } = data
+
+  console.log(food)
 
   gameConfig.side = config.side
   gameConfig.scale = gameConfig.side / 20
@@ -227,7 +229,6 @@ function draw() {
   else {
 
     for (let id in players) {
-      console.log(playerId)
       const snake = players[id].snake
       snake.update();
       snake.draw();
@@ -250,10 +251,10 @@ function draw() {
             }
             if (id === playerId) {
               socket.send(JSON.stringify({
-                event: "spawnFood"
+                event: "foodEaten",
+                id: String(food.id)
               }));
             }
-            foodConfig.storage.splice(i, 1)
           }
 
           food.draw()
@@ -361,12 +362,14 @@ function keyPressed() {
 function spawnFood() {
 
   for (let i = 0; i < foodConfig.quantity; i++) {
-    const [col, row] = foodConfig.coordinates[i]
-    foodConfig.storage.push(new Food(col, row))
+    const [col, row, id] = foodConfig.coordinates[i]
+    foodConfig.storage.push(new Food(col, row, id))
   }
 }
-function spawnOneFood(col, row) {
-  foodConfig.storage.push(new Food(col, row))
+function updateFood(col, row, id) {
+  console.log('updating food', col, row, id)
+  const foodToUpdate = foodConfig.storage.find(food => food.id === id)
+  foodToUpdate.position({ x: col, y: row })
 
 }
 function drawGrid() {
@@ -458,7 +461,6 @@ function showPing() {
   textAlign(LEFT, TOP);
   text(`Ping: ${pingValue}ms`, 5, 5);
 }
-
 
 function drawUIBox() {
   uiCanvas.clear();
