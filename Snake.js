@@ -1,5 +1,5 @@
 class Snake {
-    constructor(x = 2 + offset, y = 4, type = 'player') {
+    constructor(x = 2 + offset, y = 4, type = 'player', colors = {}) {
         this.type = type
         this.start = { x, y }
         this.x = x * gameConfig.scale + offset
@@ -7,16 +7,9 @@ class Snake {
 
         this.colors =
         {
-            'player': {
-                body: getRandomColor(),
-                head: getRandomColor(),
-                eyes: getRandomColor()
-            },
-            'pc': {
-                body: getRandomColor(),
-                head: getRandomColor(),
-                eyes: getRandomColor()
-            }
+            body: colors.body || getRandomColor(),
+            head: colors.head || getRandomColor(),
+            eyes: colors.eyes || getRandomColor()
         }
     }
 
@@ -90,7 +83,7 @@ class Snake {
         this.keyPressedThisFrame++;
     }
     draw() {
-        const bodyColor = this.colors[this.type].body
+        const bodyColor = this.colors.body
         fill(bodyColor);
         strokeWeight(2);
         stroke('black');
@@ -104,11 +97,11 @@ class Snake {
 
         // Draw head
         strokeWeight(2);
-        fill(this.colors[this.type].head);
+        fill(this.colors.head);
         circle(this.x + gameConfig.scale / 2, this.y + gameConfig.scale / 2, gameConfig.scale);
 
         // Draw eyes
-        fill(this.colors[this.type].eyes);
+        fill(this.colors.eyes);
         stroke('yellow');
         strokeWeight(1);
         rect(this.x + 3 * gameConfig.scale / 5, this.y, gameConfig.scale / 5);
@@ -146,9 +139,9 @@ class Snake {
         this.speed.x = 0;
         this.speed.y = 0;
         this.isDead = true;
-        this.colors[this.type].head = 'black'
-        this.colors[this.type].eyes = 'gray'
-        this.colors[this.type].body = 'darkred'
+        this.colors.head = 'black'
+        this.colors.eyes = 'gray'
+        this.colors.body = 'darkred'
     }
     death() {
         this.tail.forEach(segment => {
@@ -190,18 +183,11 @@ class Snake {
         }
     }
     resetColors() {
-        this.colors =
-        {
-            'player': {
-                body: 'blue',
-                head: 'brown',
-                eyes: 'red'
-            },
-            'pc': {
-                body: 'green',
-                head: 'darkgreen',
-                eyes: 'red'
-            }
+        this.colors = {
+
+            body: 'blue',
+            head: 'brown',
+            eyes: 'red'
         }
     }
 }

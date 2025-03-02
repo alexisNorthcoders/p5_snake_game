@@ -72,9 +72,9 @@ Multiplayer
 - Set color in waiting room screen server side
 - Add dead status
 - Add tail size in server
-- Send game config when game starts 
+- ✅ Send game config when game starts 
    - ✅ food position
-   - players starting position
+   - ✅ players starting position
 - Move pause game logic to server
 - Add score logic to the server
 - Move player position logic to the server?
