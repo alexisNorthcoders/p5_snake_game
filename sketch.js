@@ -27,6 +27,14 @@ let isSameType = false
 let disableFood = false
 let name
 let walls
+let snakeColors = {
+  body: getRandomColor(),
+  head: getRandomColor(),
+  eyes: getRandomColor()
+};
+let buttonX, buttonY, buttonWidth = 100, buttonHeight = 40;
+let previewX, previewY;
+
 const foodConfig = {
   types: ['super', 'normal'],
   storage: [],
@@ -147,19 +155,66 @@ function showWaitingRoom() {
   noStroke();
   fill(32);
   rect(10 + offset, 10, gameConfig.side - 20, gameConfig.side - 20, gameConfig.scale);
+
+  // Text instructions
   fill(255);
-  textSize(gameConfig.scale);
+  textSize(gameConfig.scale * 0.5);
   textAlign(CENTER, CENTER);
   text(
     `Waiting for players... (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
     gameConfig.side / 2 + offset,
-    gameConfig.side / 2
+    gameConfig.side / 2 - 50
   );
+
+  // Show current colors
+  textSize(gameConfig.scale * 0.4);
+  text("Click to change colors:", gameConfig.side / 2 + offset, gameConfig.side / 2);
+
+  // Draw color preview
+  previewX = gameConfig.side / 2 - 40 + offset;
+  previewY = gameConfig.side / 2 + 30;
+
+  strokeWeight(2);
+  stroke('black');
+
+  // Draw body segments (clickable)
+  fill(snakeColors.body);
+  square(previewX, previewY, 20);
+  square(previewX - 20, previewY, 20);
+  square(previewX - 40, previewY, 20);
+
+  // Draw head (clickable)
+  fill(snakeColors.head);
+  circle(previewX + 30, previewY + 10, 25);
+
+  // Draw eyes (clickable)
+  fill(snakeColors.eyes);
+  stroke('yellow');
+  strokeWeight(1);
+  rect(previewX + 30 - 5, previewY + 5, 5);
+  rect(previewX + 30 + 5, previewY + 5, 5);
+
+  // Draw "Set Colors" button
+  buttonX = gameConfig.side / 2 - 50 + offset;
+  buttonY = gameConfig.side / 2 + 80;
+  fill(50, 150, 255);
+  strokeWeight(2);
+  stroke(255);
+  rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
+
+  fill(255);
+  noStroke();
+  textSize(18);
+  textAlign(CENTER, CENTER);
+  text("Set Colors", buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
 }
 function windowResized() {
   // resizeCanvasToFitWindow();
 }
 function keyPressed() {
+  if (keyCode === 66) snakeColors.body = getRandomColor();
+  if (keyCode === 72) snakeColors.head = getRandomColor();
+  if (keyCode === 69) snakeColors.eyes = getRandomColor();
   // press Enter to start game
   if (waitingRoom && keyCode === ENTER && Object.keys(players).length >= minPlayers) {
     socket.send(JSON.stringify({ event: "startGame" }));
@@ -220,6 +275,51 @@ function keyPressed() {
   }
 
 }
+
+// Detect mouse clicks
+function mousePressed() {
+  // Check if "Set Colors" button is clicked
+  if (
+    mouseX > buttonX && mouseX < buttonX + buttonWidth &&
+    mouseY > buttonY && mouseY < buttonY + buttonHeight
+  ) {
+    socket.send(JSON.stringify({
+      event: "updatePlayer",
+      player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
+    }));
+    return;
+  }
+
+  // Check if body is clicked
+  if (
+    mouseX > previewX - 40 && mouseX < previewX + 20 &&
+    mouseY > previewY && mouseY < previewY + 20
+  ) {
+    snakeColors.body = getRandomColor();
+    console.log('clicked')
+    return;
+  }
+
+  // Check if head is clicked
+  if (
+    dist(mouseX, mouseY, previewX + 30, previewY + 10) < 12.5
+  ) {
+    snakeColors.head = getRandomColor();
+    return;
+  }
+
+  // Check if eyes are clicked
+  if (
+    (mouseX > previewX + 30 - 5 && mouseX < previewX + 30 &&
+      mouseY > previewY + 5 && mouseY < previewY + 10) ||
+    (mouseX > previewX + 30 + 5 && mouseX < previewX + 35 &&
+      mouseY > previewY + 5 && mouseY < previewY + 10)
+  ) {
+    snakeColors.eyes = getRandomColor();
+    return;
+  }
+}
+
 function spawnFood() {
 
   for (let i = 0; i < foodConfig.quantity; i++) {

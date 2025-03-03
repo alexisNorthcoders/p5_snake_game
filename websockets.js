@@ -38,7 +38,7 @@ function connectWebSocket() {
         console.log(`You joined as ${name}`);
         socket.send(JSON.stringify({
             event: "newPlayer",
-            player: { name, id: playerId, colours: { head: getRandomColor(), body: getRandomColor(), eyes: getRandomColor() } }
+            player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
         }));
         socket.send(JSON.stringify({
             event: "getConfig"
