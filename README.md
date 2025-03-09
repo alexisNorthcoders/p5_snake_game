@@ -89,3 +89,5 @@ Multiplayer
    - server now updates the position of the food eaten without creating a new food
 - ✅ Initial load of the page often times won't connect to the ws and requires refreshing the page ( client or server problem?)
    - Fixed by moving socket logic outside of setup()  
+- Debug drawing grids
+- Fix scale factor UI (text too big, or too small)

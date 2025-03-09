@@ -63,12 +63,14 @@ function loadConfig(gameConfig, data) {
 
   gameConfigured = true;
 
+  console.log(data)
+
   const { config, food } = data
 
-  console.log(food)
-
   gameConfig.side = config.side
-  gameConfig.scale = gameConfig.side / 20
+  gameConfig.backgroundColour = config.backgroundColour
+  gameConfig.waitingRoom = config.waitingRoom
+  gameConfig.scale = gameConfig.side / config.scaleFactor
   gameConfig.cols = gameConfig.side / gameConfig.scale
   gameConfig.rows = gameConfig.side / gameConfig.scale
   foodConfig.coordinates = food
@@ -85,7 +87,7 @@ function loadConfig(gameConfig, data) {
 function draw() {
   if (!connected || !gameConfigured) return;
 
-  background('tan');
+  background(gameConfig.backgroundColour);
 
   if (waitingRoom) {
     drawUIBox()
@@ -153,7 +155,7 @@ function draw() {
 }
 function showWaitingRoom() {
   noStroke();
-  fill(32);
+  fill(gameConfig.waitingRoom.backgroundColour);
   rect(10 + offset, 10, gameConfig.side - 20, gameConfig.side - 20, gameConfig.scale);
 
   // Text instructions
@@ -161,7 +163,7 @@ function showWaitingRoom() {
   textSize(gameConfig.scale * 0.5);
   textAlign(CENTER, CENTER);
   text(
-    `Waiting for players... (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
+    `${gameConfig.waitingRoom.waitingRoomMessage} Waiting for players... (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
     gameConfig.side / 2 + offset,
     gameConfig.side / 2 - 50
   );
