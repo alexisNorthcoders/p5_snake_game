@@ -8,7 +8,6 @@ let waitingRoom = true;
 let minPlayers = 1;
 let pingValue = 0
 let uiCanvas
-let offset = 200
 let showGrid = false;
 let players = {};
 let audioStarted = false;
@@ -16,7 +15,6 @@ let key;
 let gameStarted = false;
 let gamePaused = false
 let playerId
-let fps = 10
 let collision = false
 let drawWalls = false
 let score = 0
@@ -68,6 +66,7 @@ function loadConfig(gameConfig, data) {
   const { config, food } = data
 
   gameConfig.side = config.side
+  gameConfig.leftSectionSize = config.leftSectionSize
   gameConfig.backgroundColour = config.backgroundColour
   gameConfig.waitingRoom = config.waitingRoom
   gameConfig.scale = gameConfig.side / config.scaleFactor
@@ -78,9 +77,9 @@ function loadConfig(gameConfig, data) {
   fps = config.fps
   walls = new Walls()
 
-  createCanvas(gameConfig.side + offset, gameConfig.side);
-  uiCanvas = createGraphics(offset, gameConfig.side);
-  frameRate(fps)
+  createCanvas(gameConfig.side + gameConfig.leftSectionSize, gameConfig.side);
+  uiCanvas = createGraphics(gameConfig.leftSectionSize, gameConfig.side);
+  //frameRate(fps)
   showStartScreen()
 
 }
@@ -100,63 +99,24 @@ function draw() {
   }
   else {
 
+    // draw snakes
     for (let id in players) {
-      const snake = players[id].snake
-      snake.update();
-      snake.draw();
-      snake.death();
-      if (!disableFood) {
-
-        foodConfig.storage.forEach((food, i) => {
-          if (snake.eat(food)) {
-            if (lastType === food.type) {
-              isSameType = true
-              lastScores += 10
-              score += 10
-            }
-            else {
-              isSameType = false
-              lastType = food.type
-              score += 10
-              score += 2 * lastScores
-              lastScores = 0
-            }
-            if (id === playerId) {
-              socket.send(JSON.stringify({
-                event: "foodEaten",
-                id: String(food.id)
-              }));
-            }
-          }
-
-          food.draw()
-          food.update()
-        })
-      }
+      players[id].snake.draw()
     }
+    // draw food
+    if (!disableFood) foodConfig.storage.forEach((food) => food.draw())
+
     drawWalls ? walls.draw() : null
 
     drawUIBox()
 
-    const hasCollided = false //walls.checkCollision(snake);
-    if (hasCollided && collision) {
-      // snake.stop()
-      console.log('Game Over!')
-    }
-
-
-
-    if (gamePaused) {
-      showPauseScreen()
-    }
+    if (gamePaused) showPauseScreen()
   }
-
-
 }
 function showWaitingRoom() {
   noStroke();
   fill(gameConfig.waitingRoom.backgroundColour);
-  rect(10 + offset, 10, gameConfig.side - 20, gameConfig.side - 20, gameConfig.scale);
+  rect(10 + gameConfig.leftSectionSize, 10, gameConfig.side - 20, gameConfig.side - 20, gameConfig.scale);
 
   // Text instructions
   fill(255);
@@ -164,16 +124,16 @@ function showWaitingRoom() {
   textAlign(CENTER, CENTER);
   text(
     `${gameConfig.waitingRoom.waitingRoomMessage} Waiting for players... (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
-    gameConfig.side / 2 + offset,
+    gameConfig.side / 2 + gameConfig.leftSectionSize,
     gameConfig.side / 2 - 50
   );
 
   // Show current colors
   textSize(gameConfig.scale * 0.4);
-  text("Click to change colors:", gameConfig.side / 2 + offset, gameConfig.side / 2);
+  text("Click to change colors:", gameConfig.side / 2 + gameConfig.leftSectionSize, gameConfig.side / 2);
 
   // Draw color preview
-  previewX = gameConfig.side / 2 - 40 + offset;
+  previewX = gameConfig.side / 2 - 40 + gameConfig.leftSectionSize;
   previewY = gameConfig.side / 2 + 30;
 
   strokeWeight(2);
@@ -197,7 +157,7 @@ function showWaitingRoom() {
   rect(previewX + 30 + 5, previewY + 5, 5);
 
   // Draw "Set Colors" button
-  buttonX = gameConfig.side / 2 - 50 + offset;
+  buttonX = gameConfig.side / 2 - 50 + gameConfig.leftSectionSize;
   buttonY = gameConfig.side / 2 + 80;
   fill(50, 150, 255);
   strokeWeight(2);
@@ -229,14 +189,6 @@ function keyPressed() {
     case 50:
       showGrid = !showGrid
       break
-    case 107:
-      fps += 10
-      frameRate(fps)
-      break
-    case 109:
-      fps -= 10
-      frameRate(fps)
-      break
     case 38:
     case 87:
       key = 'UP';
@@ -267,10 +219,6 @@ function keyPressed() {
       player: {
         name,
         id: playerId,
-        snake: {
-          x: players[playerId].snake.x,
-          y: players[playerId].snake.y
-        }
       },
       key
     }));

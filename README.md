@@ -69,26 +69,32 @@ Multiplayer
 - ✅ Move food spawn logic to server
 - ✅ Add waiting room for players
 - ✅ Add ping counter
-- Set color in waiting room screen
-   - Server
-   - ✅ Client 
-- Add dead status
-- Add tail size in server
+- ✅ Set color in waiting room screen
+   - ✅ Server - server broadcasts the color
+   - ✅ Client - color is chosen and sent to the server to be broadcast
+- ✅ Add tail size in server
 - ✅ Send game config when game starts 
    - ✅ food position
    - ✅ players starting position
+   - ✅ Configs being fetched from Contentful CMS
+- ✅ Move player position logic to the server
+   - ✅ Server snake is rendered with server sent positions and not using client logic  
+   - ✅ Player snake is rendered with server sent positions and not using client logic
+- Add respawn food logic after snake eats food
+- Add snake collision to its own body
 - Move pause game logic to server
 - Add score logic to the server
-- Move player position logic to the server?
-   - 🚧 WIP 🚧. Server snake is rendered with server sent positions and not using client logic  
+- Add dead status
 - Allow multiple rooms
 - Allow for single game mode / local multiplayer only
 - Single game mode features only ( framerate, canvas resize, etc)
+- Optimize websockets message to reduce size and increase performance
 
 ## Bugs
 - ✅ Food being spawned many times or in not in the same place for all clients 
    - server now updates the position of the food eaten without creating a new food
 - ✅ Initial load of the page often times won't connect to the ws and requires refreshing the page ( client or server problem?)
-   - Fixed by moving socket logic outside of setup()  
+   - Fixed by moving socket logic outside of setup() 
+- 🚨 Fix colors not being set on waiting room and breaking the game 
 - Debug drawing grids
 - Fix scale factor UI (text too big, or too small)

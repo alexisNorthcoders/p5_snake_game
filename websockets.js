@@ -66,30 +66,14 @@ function connectWebSocket() {
                     break
                 case "waitingRoomStatus":
                     console.log("waitingRoomStatus", data)
-                    data.players.forEach((player) => players[player.id] = { ...player, snake: new Snake(player.snake?.x, player.snake?.y, player.type, player.colours) })
+                    data.players.forEach((player) => players[player.id] = { ...player, snake: new Snake(player.snake?.x, player.snake?.y, player.type, player.colours, player.snake.size) })
                     break;
                 case "startGame":
                     waitingRoom = false;
                     startGame();
                     break;
-                case "playerMovement":
-                    if (data.player.name === 'Server') {
-                        console.log(`Player: ${data.player.name}, Key: ${data.key}`)
-                        players[data.player.id].snake.snakeKey(data.key)
-                    }
-                    else if (players[data.player.id]) {
-                        console.log(`Player: ${data.player.name}, Key: ${data.key}, Position: ${JSON.stringify(data.player.snake)}`)
-                        players[data.player.id].snake.position({ x: data.player.snake.x, y: data.player.snake.y })
-                        players[data.player.id].snake.snakeKey(data.key)
-                    }
-                    break;
-
                 case "playerDisconnected":
                     delete players[data.player.id];
-                    break;
-                case "food":
-                    console.log('food called')
-                    players[data.player.id] = { ...data.player, snake: new Snake() };
                     break;
                 case "config":
                     if (!gameConfigured) loadConfig(gameConfig, data);
@@ -100,8 +84,12 @@ function connectWebSocket() {
                     updateFood(col, row, id)
                     break;
                 case "snake_update":
-                    const { player } = data
-                    players[player.id].snake.position({ x: player.snake.x, y: player.snake.y })
+                    const { snakesMap } = data
+                    for (let id in snakesMap) {
+                        players[id].snake.tail = snakesMap[id].snake.tail
+                        players[id].snake.x = snakesMap[id].snake.x
+                        players[id].snake.y = snakesMap[id].snake.y
+                    }
                     break;
 
                 default:

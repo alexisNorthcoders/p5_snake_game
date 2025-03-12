@@ -1,9 +1,9 @@
 class Walls {
     thickness = gameConfig.scale
-    topWall = { x: 0 + offset, y: 0, width: gameConfig.side / 2, height: this.thickness };
-    bottomWall = { x: 0 + offset, y: gameConfig.side - this.thickness, width: gameConfig.side / 2, height: this.thickness };
-    leftWall = { x: 0 + offset, y: 0, width: this.thickness, height: gameConfig.side };
-    rightWall = { x: gameConfig.side - this.thickness + offset, y: 0, width: this.thickness, height: gameConfig.side };
+    topWall = { x: 0 + gameConfig.leftSectionSize, y: 0, width: gameConfig.side / 2, height: this.thickness };
+    bottomWall = { x: 0 + gameConfig.leftSectionSize, y: gameConfig.side - this.thickness, width: gameConfig.side / 2, height: this.thickness };
+    leftWall = { x: 0 + gameConfig.leftSectionSize, y: 0, width: this.thickness, height: gameConfig.side };
+    rightWall = { x: gameConfig.side - this.thickness + gameConfig.leftSectionSize, y: 0, width: this.thickness, height: gameConfig.side };
     array = [this.topWall, this.bottomWall, this.leftWall, this.rightWall]
     draw() {
         stroke('black');
