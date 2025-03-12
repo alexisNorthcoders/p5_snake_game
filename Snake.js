@@ -53,6 +53,7 @@ class Snake {
         return false
     }
     update() {
+        if (this.type === "server") return
         if (this.isDead) {
             return;
         }

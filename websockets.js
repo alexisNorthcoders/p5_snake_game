@@ -78,8 +78,8 @@ function connectWebSocket() {
                         players[data.player.id].snake.snakeKey(data.key)
                     }
                     else if (players[data.player.id]) {
-                        console.log(`Player: ${data.player.name}, Key: ${data.key}`)
-                        players[data.player.id].snake.position(data.player.snake)
+                        console.log(`Player: ${data.player.name}, Key: ${data.key}, Position: ${JSON.stringify(data.player.snake)}`)
+                        players[data.player.id].snake.position({ x: data.player.snake.x, y: data.player.snake.y })
                         players[data.player.id].snake.snakeKey(data.key)
                     }
                     break;
@@ -88,6 +88,7 @@ function connectWebSocket() {
                     delete players[data.player.id];
                     break;
                 case "food":
+                    console.log('food called')
                     players[data.player.id] = { ...data.player, snake: new Snake() };
                     break;
                 case "config":
@@ -97,6 +98,10 @@ function connectWebSocket() {
                     const { food } = data
                     const [col, row, id] = food[0]
                     updateFood(col, row, id)
+                    break;
+                case "snake_update":
+                    const { player } = data
+                    players[player.id].snake.position({ x: player.snake.x, y: player.snake.y })
                     break;
 
                 default:
