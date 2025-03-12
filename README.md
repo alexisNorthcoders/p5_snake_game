@@ -80,6 +80,7 @@ Multiplayer
 - Move pause game logic to server
 - Add score logic to the server
 - Move player position logic to the server?
+   - 🚧 WIP 🚧. Server snake is rendered with server sent positions and not using client logic  
 - Allow multiple rooms
 - Allow for single game mode / local multiplayer only
 - Single game mode features only ( framerate, canvas resize, etc)
