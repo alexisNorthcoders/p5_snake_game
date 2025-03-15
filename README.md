@@ -80,7 +80,8 @@ Multiplayer
 - ✅ Move player position logic to the server
    - ✅ Server snake is rendered with server sent positions and not using client logic  
    - ✅ Player snake is rendered with server sent positions and not using client logic
-- Add respawn food logic after snake eats food
+- ✅ Add respawn food logic after snake eats food
+- ✅ Add sound effect
 - Add snake collision to its own body
 - Move pause game logic to server
 - Add score logic to the server
@@ -95,6 +96,6 @@ Multiplayer
    - server now updates the position of the food eaten without creating a new food
 - ✅ Initial load of the page often times won't connect to the ws and requires refreshing the page ( client or server problem?)
    - Fixed by moving socket logic outside of setup() 
-- 🚨 Fix colors not being set on waiting room and breaking the game 
-- Debug drawing grids
+- ✅ Fix colors not being set on waiting room and breaking the game 
+- ✅ Debug drawing grids ( scale factor needs to be multiple of canvas size)
 - Fix scale factor UI (text too big, or too small)

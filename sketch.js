@@ -32,6 +32,10 @@ let snakeColors = {
 };
 let buttonX, buttonY, buttonWidth = 100, buttonHeight = 40;
 let previewX, previewY;
+let snakeImg;
+function preload() {
+  snakeImg = loadImage('snakelogo.png');
+}
 
 const foodConfig = {
   types: ['super', 'normal'],
@@ -55,6 +59,7 @@ function measurePing() {
   socket.send(JSON.stringify({ event: "ping" }))
 }
 function setup() {
+  preload()
   connectWebSocket();
 }
 function loadConfig(gameConfig, data) {
@@ -246,7 +251,6 @@ function mousePressed() {
     mouseY > previewY && mouseY < previewY + 20
   ) {
     snakeColors.body = getRandomColor();
-    console.log('clicked')
     return;
   }
 
@@ -278,14 +282,14 @@ function spawnFood() {
   }
 }
 function updateFood(col, row, id) {
-  console.log('updating food', col, row, id)
+  // only update the food changing position
   const foodToUpdate = foodConfig.storage.find(food => food.id === id)
   foodToUpdate.position({ x: col, y: row })
 }
 function drawGrid() {
   stroke('white');
   strokeWeight(0.05);
-  for (let x = 0; x < width; x += gameConfig.scale) {
+  for (let x = gameConfig.leftSectionSize; x < width; x += gameConfig.scale) {
     for (let y = 0; y < height; y += gameConfig.scale) {
       line(x, 0, x, height);
       line(0, y, width, y);
@@ -375,12 +379,16 @@ function drawUIBox() {
 
   // Background
 
-  uiCanvas.fill("#F5DEB3")
+  uiCanvas.fill("#31253b")
   uiCanvas.rect(0, 0, uiCanvas.width, uiCanvas.height)
+
+  // Image 
+
+ 
 
   // Text
   uiCanvas.noStroke();
-  uiCanvas.fill("black");
+  uiCanvas.fill("white");
   uiCanvas.textSize(16);
   uiCanvas.textAlign(LEFT, CENTER);
 
@@ -398,6 +406,7 @@ function drawUIBox() {
 
   image(uiCanvas, 0, 0);
   loop()
+  image(snakeImg, 0, 400, 200, 200)
 }
 function playSound(frequency, duration) {
 

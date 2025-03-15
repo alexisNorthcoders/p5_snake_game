@@ -81,6 +81,7 @@ function connectWebSocket() {
                 case "updateFood":
                     const { food } = data
                     const [col, row, id] = food[0]
+                    playChompSound()
                     updateFood(col, row, id)
                     break;
                 case "snake_update":
