@@ -33,8 +33,10 @@ let snakeColors = {
 let buttonX, buttonY, buttonWidth = 100, buttonHeight = 40;
 let previewX, previewY;
 let snakeImg;
+let appleImg;
 function preload() {
   snakeImg = loadImage('snakelogo.png');
+  appleImg = loadImage('assets/images/apple.png');
 }
 
 const foodConfig = {
@@ -83,12 +85,14 @@ function loadConfig(gameConfig, data) {
   walls = new Walls()
 
   createCanvas(gameConfig.side + gameConfig.leftSectionSize, gameConfig.side);
+  noSmooth();
   uiCanvas = createGraphics(gameConfig.leftSectionSize, gameConfig.side);
   //frameRate(fps)
   showStartScreen()
 
 }
 function draw() {
+
   if (!connected || !gameConfigured) return;
 
   background(gameConfig.backgroundColour);
@@ -104,12 +108,13 @@ function draw() {
   }
   else {
 
+    // draw food
+    if (!disableFood) foodConfig.storage.forEach((food) => food.draw())
     // draw snakes
     for (let id in players) {
       players[id].snake.draw()
     }
-    // draw food
-    if (!disableFood) foodConfig.storage.forEach((food) => food.draw())
+
 
     drawWalls ? walls.draw() : null
 
@@ -384,7 +389,7 @@ function drawUIBox() {
 
   // Image 
 
- 
+
 
   // Text
   uiCanvas.noStroke();
