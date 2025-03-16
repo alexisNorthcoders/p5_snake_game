@@ -87,9 +87,11 @@ function connectWebSocket() {
                 case "snake_update":
                     const { snakesMap } = data
                     for (let id in snakesMap) {
+                        if (players[id].snake.isDead) continue
                         players[id].snake.tail = snakesMap[id].snake.tail
                         players[id].snake.x = snakesMap[id].snake.x
                         players[id].snake.y = snakesMap[id].snake.y
+                        if (snakesMap[id].snake.isDead) players[id].snake.stop()
                     }
                     break;
 

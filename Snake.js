@@ -55,22 +55,12 @@ class Snake {
     }
 
     stop() {
-        this.speed.x = 0;
-        this.speed.y = 0;
-        this.isDead = true;
+        this.isDead = true
         this.colors.head = 'black'
         this.colors.eyes = 'gray'
         this.colors.body = 'darkred'
     }
-    death() {
-        if (this.type === "server") return
-        this.tail.forEach(segment => {
-            const distance = dist(this.x, this.y, segment.x, segment.y)
-            if (distance === 0) {
-                this.stop()
-            }
-        });
-    }
+
     async reset() {
         await postUserScore(1)
         this.isDead = false
