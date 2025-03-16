@@ -20,6 +20,7 @@ let drawWalls = false
 let score = 0
 let scoreMultiplier = 2
 let lastScores = 0
+let highScore
 let lastType
 let isSameType = false
 let disableFood = false
@@ -87,8 +88,6 @@ function loadConfig(gameConfig, data) {
   createCanvas(gameConfig.side + gameConfig.leftSectionSize, gameConfig.side);
   noSmooth();
   uiCanvas = createGraphics(gameConfig.leftSectionSize, gameConfig.side);
-  //frameRate(fps)
-  showStartScreen()
 
 }
 function draw() {
@@ -103,9 +102,6 @@ function draw() {
     return;
   }
   if (showGrid) drawGrid();
-  if (!gameStarted) {
-    showStartScreen()
-  }
   else {
 
     // draw food
@@ -131,6 +127,8 @@ function showWaitingRoom() {
   // Text instructions
   fill(255);
   textSize(gameConfig.scale * 0.5);
+  textAlign(CENTER, 50);
+  text(`${name} highest score: ${highScore}`, gameConfig.side / 2 + gameConfig.leftSectionSize, gameConfig.scale)
   textAlign(CENTER, CENTER);
   text(
     `${gameConfig.waitingRoom.waitingRoomMessage} Waiting for players... (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
@@ -306,33 +304,10 @@ function resizeCanvasToFitWindow() {
   scale = side / 20
   resizeCanvas(side, side);
 }
-function showStartScreen() {
-  getUserScore(1)
-  noStroke();
-  fill(32);
-  rect(10, 10, gameConfig.side - 20, gameConfig.side - 20, gameConfig.scale);
-  fill(255);
-  text(
-    'Key buttons: \n1 Draw walls. \n2 Draw grid. \n+ Increase framerate  \n- Decrease framerate \nEnter Pause game \nR Restart',
-    gameConfig.side / 2,
-    3 * gameConfig.scale
-  );
-  textAlign(CENTER, CENTER)
-
-  textSize(gameConfig.scale)
-
-  text(
-    'Click to play.\nUse arrow keys or WASD to move.',
-    gameConfig.side / 2,
-    gameConfig.side / 2
-  );
-  noLoop();
-}
 function startGame() {
   if (connected && gameConfigured) {
     spawnFood()
     gameStarted = true
-    showScore()
     loop();
   }
 }
@@ -359,18 +334,6 @@ function showPauseScreen() {
     gameConfig.side / 2
   );
 }
-function showScore() {
-  stroke('black');
-  strokeWeight(2)
-  fill(255);
-  textAlign(CENTER, CENTER)
-  textSize(gameConfig.scale)
-  text(
-    `Score: ${score}`,
-    gameConfig.side / 2,
-    gameConfig.scale * 1.2
-  );
-}
 function showPing() {
   stroke('black');
   strokeWeight(2)
@@ -386,10 +349,6 @@ function drawUIBox() {
 
   uiCanvas.fill("#31253b")
   uiCanvas.rect(0, 0, uiCanvas.width, uiCanvas.height)
-
-  // Image 
-
-
 
   // Text
   uiCanvas.noStroke();
@@ -411,6 +370,7 @@ function drawUIBox() {
 
   image(uiCanvas, 0, 0);
   loop()
+  // snake game logo
   image(snakeImg, 0, 400, 200, 200)
 }
 function playSound(frequency, duration) {

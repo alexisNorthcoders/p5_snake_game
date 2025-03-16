@@ -36,6 +36,10 @@ function connectWebSocket() {
         }
 
         console.log(`You joined as ${name}`);
+        getUserScore(playerId).then(data => {
+            const userScores = data.sort((a, b) => b.score - a.score)
+            highScore = userScores[0]?.score
+        })
         socket.send(JSON.stringify({
             event: "newPlayer",
             player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
@@ -87,6 +91,7 @@ function connectWebSocket() {
                 case "snake_update":
                     const { snakesMap } = data
                     for (let id in snakesMap) {
+                        if (id === playerId) score = snakesMap[id].snake.score
                         if (players[id].snake.isDead) continue
                         players[id].snake.tail = snakesMap[id].snake.tail
                         players[id].snake.x = snakesMap[id].snake.x

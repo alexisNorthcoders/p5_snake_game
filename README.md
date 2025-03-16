@@ -82,10 +82,10 @@ Multiplayer
    - ✅ Player snake is rendered with server sent positions and not using client logic
 - ✅ Add respawn food logic after snake eats food
 - ✅ Add sound effect
-- Add snake collision to its own body
+- ✅ Add snake collision to its own body
+- ✅ Add score logic to the server
+- ✅ Add dead status
 - Move pause game logic to server
-- Add score logic to the server
-- Add dead status
 - Allow multiple rooms
 - Allow for single game mode / local multiplayer only
 - Single game mode features only ( framerate, canvas resize, etc)

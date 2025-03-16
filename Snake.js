@@ -54,22 +54,12 @@ class Snake {
         rect(this.x + gameConfig.scale / 5, this.y, gameConfig.scale / 5);
     }
 
-    stop() {
+    async stop() {
         this.isDead = true
         this.colors.head = 'black'
         this.colors.eyes = 'gray'
         this.colors.body = 'darkred'
-    }
-
-    async reset() {
-        await postUserScore(1)
-        this.isDead = false
-        this.x = this.start.x * gameConfig.scale + gameConfig.leftSectionSize
-        this.y = this.start.y * gameConfig.scale
-        this.tail = []
-        this.size = 0
-        this.speed = { x: 1 / gameConfig.scale / 0.2, y: 0 };
-        this.direction(1, 0)
-
+        await postUserScore(playerId)
+        console.log(`Posted score of ${score} for PlayerId: ${playerId} `)
     }
 }
