@@ -371,14 +371,22 @@ function showPauseScreen() {
 function showGameOverScreen() {
   noStroke();
   fill('black');
-  rect(10, gameConfig.side / 2 - scale, gameConfig.side - 20, 2 * scale, scale);
-  fill(255);
-  textAlign(CENTER, CENTER)
-  textSize(gameConfig.scale)
+
+  let rectX = gameConfig.side / 4 + gameConfig.leftSectionSize;
+  let rectY = gameConfig.side / 2 - gameConfig.scale;
+  let rectWidth = gameConfig.side / 2;
+  let rectHeight = 2 * gameConfig.scale;
+
+  rect(rectX, rectY, rectWidth, rectHeight, gameConfig.scale);
+
+  fill('white');
+  textAlign(CENTER, CENTER);
+  textSize(gameConfig.scale * 1.5);
+
   text(
     'Game Over',
-    gameConfig.side / 2 + gameConfig.leftSectionSize,
-    gameConfig.side / 2
+    rectX + rectWidth / 2,
+    rectY + rectHeight / 2
   );
 }
 function showPing() {
