@@ -85,6 +85,8 @@ Multiplayer
 - ✅ Add snake collision to its own body
 - ✅ Add score logic to the server
 - ✅ Add dead status
+- Add different types of food / multiple scores
+- Add score multiplier
 - Move pause game logic to server
 - Allow multiple rooms
 - Allow for single game mode / local multiplayer only

@@ -32,12 +32,19 @@ let snakeColors = {
   eyes: getRandomColor()
 };
 let buttonX, buttonY, buttonWidth = 100, buttonHeight = 40;
-let previewX, previewY;
+let previewX, previewY, backgroundPreviewX, backgroundPreviewY;
 let snakeImg;
 let appleImg;
+const backgroundImages = []
+let randomBackground = Math.ceil(Math.random() * 91)
+let bgBuffer;
 function preload() {
   snakeImg = loadImage('snakelogo.png');
   appleImg = loadImage('assets/images/apple.png');
+  // load backgrounds
+  for (let i = 1; i <= 91; i++) {
+    backgroundImages.push(loadImage(`assets/images/backgrounds/color_background_${i}.png`));
+  }
 }
 
 const foodConfig = {
@@ -88,13 +95,23 @@ function loadConfig(gameConfig, data) {
   createCanvas(gameConfig.side + gameConfig.leftSectionSize, gameConfig.side);
   noSmooth();
   uiCanvas = createGraphics(gameConfig.leftSectionSize, gameConfig.side);
+}
+function drawBackground(img) {
 
+  for (let x = gameConfig.leftSectionSize; x < width; x += img.width) {
+    for (let y = 0; y < height; y += img.height) {
+      image(img, x, y, img.width, img.height);
+    }
+  }
 }
 function draw() {
 
   if (!connected || !gameConfigured) return;
 
-  background(gameConfig.backgroundColour);
+  //background(gameConfig.backgroundColour);
+
+  drawBackground(backgroundImages[randomBackground])
+
 
   if (waitingRoom) {
     drawUIBox()
@@ -133,16 +150,24 @@ function showWaitingRoom() {
   text(
     `${gameConfig.waitingRoom.waitingRoomMessage} Waiting for players... (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
     gameConfig.side / 2 + gameConfig.leftSectionSize,
-    gameConfig.side / 2 - 50
+    gameConfig.side * 0.2
   );
 
   // Show current colors
   textSize(gameConfig.scale * 0.4);
-  text("Click to change colors:", gameConfig.side / 2 + gameConfig.leftSectionSize, gameConfig.side / 2);
+  text("Click the snake body or head to change colors:", gameConfig.side / 2 + gameConfig.leftSectionSize, gameConfig.side / 2);
 
   // Draw color preview
   previewX = gameConfig.side / 2 - 40 + gameConfig.leftSectionSize;
   previewY = gameConfig.side / 2 + 30;
+
+  textSize(gameConfig.scale * 0.4);
+  text("Click to change background:", backgroundPreviewX - gameConfig.scale * 0.4 * 7, backgroundPreviewY + gameConfig.scale / 2);
+
+  backgroundPreviewX = gameConfig.side * 0.5 + gameConfig.leftSectionSize
+  backgroundPreviewY = gameConfig.side * 0.3, gameConfig.scale
+
+  image(backgroundImages[randomBackground], backgroundPreviewX, backgroundPreviewY, gameConfig.scale, gameConfig.scale);
 
   strokeWeight(2);
   stroke('black');
@@ -247,7 +272,15 @@ function mousePressed() {
     }));
     return;
   }
-
+  // Check is background preview is clicked
+  if (
+    mouseX > backgroundPreviewX && mouseX < backgroundPreviewX + gameConfig.scale &&
+    mouseY > backgroundPreviewY && mouseY < backgroundPreviewY + gameConfig.scale
+  ) {
+    console.log('clicked background')
+    randomBackground = Math.ceil(Math.random() * 91)
+    return;
+  }
   // Check if body is clicked
   if (
     mouseX > previewX - 40 && mouseX < previewX + 20 &&
@@ -343,6 +376,7 @@ function showPing() {
   text(`Ping: ${pingValue}ms`, 5, 5);
 }
 function drawUIBox() {
+
   uiCanvas.clear();
 
   // Background
