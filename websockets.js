@@ -82,6 +82,10 @@ function connectWebSocket() {
                 case "config":
                     if (!gameConfigured) loadConfig(gameConfig, data);
                     break;
+                case "gameover":
+                    console.log('GameOver')
+                    gameOver()
+                    break;
                 case "updateFood":
                     const { food } = data
                     const [col, row, id] = food[0]
@@ -96,7 +100,7 @@ function connectWebSocket() {
                         players[id].snake.tail = snakesMap[id].snake.tail
                         players[id].snake.x = snakesMap[id].snake.x
                         players[id].snake.y = snakesMap[id].snake.y
-                        if (snakesMap[id].snake.isDead) players[id].snake.stop()
+                        if (snakesMap[id].snake.isDead) players[id].snake.stop(id)
                     }
                     break;
 

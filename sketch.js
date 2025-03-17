@@ -26,6 +26,7 @@ let isSameType = false
 let disableFood = false
 let name
 let walls
+let isGameOver = false
 let snakeColors = {
   body: getRandomColor(),
   head: getRandomColor(),
@@ -127,13 +128,11 @@ function draw() {
     for (let id in players) {
       players[id].snake.draw()
     }
-
-
     drawWalls ? walls.draw() : null
 
     drawUIBox()
 
-    if (gamePaused) showPauseScreen()
+    if (isGameOver) showGameOverScreen()
   }
 }
 function showWaitingRoom() {
@@ -215,6 +214,8 @@ function keyPressed() {
     socket.send(JSON.stringify({ event: "startGame" }));
   }
 
+  if (isGameOver) return
+
   switch (keyCode) {
     case 49:
       drawWalls = !drawWalls
@@ -243,8 +244,8 @@ function keyPressed() {
       key = 'RIGHT'
       break;
     case ENTER:
-      if (gameStarted) pauseGame()
-      break;
+      if (gameStarted)// pauseGame()
+        break;
   }
   if (socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({
@@ -350,9 +351,9 @@ async function restartGame() {
   spawnFood()
   loop();
 }
-function pauseGame() {
-  gamePaused = !gamePaused
-  gamePaused ? noLoop() : loop()
+function gameOver() {
+  isGameOver = true
+  noLoop()
 }
 function showPauseScreen() {
   noStroke();
@@ -364,6 +365,19 @@ function showPauseScreen() {
   text(
     'Game paused...',
     gameConfig.side / 2,
+    gameConfig.side / 2
+  );
+}
+function showGameOverScreen() {
+  noStroke();
+  fill('black');
+  rect(10, gameConfig.side / 2 - scale, gameConfig.side - 20, 2 * scale, scale);
+  fill(255);
+  textAlign(CENTER, CENTER)
+  textSize(gameConfig.scale)
+  text(
+    'Game Over',
+    gameConfig.side / 2 + gameConfig.leftSectionSize,
     gameConfig.side / 2
   );
 }

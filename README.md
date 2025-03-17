@@ -85,6 +85,8 @@ Multiplayer
 - ✅ Add snake collision to its own body
 - ✅ Add score logic to the server
 - ✅ Add dead status
+- ✅ Add Game Over event
+- Add ability to restart game after game over
 - Add different types of food / multiple scores
 - Add score multiplier
 - Move pause game logic to server
