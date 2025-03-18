@@ -26,6 +26,7 @@ let isSameType = false
 let disableFood = false
 let name
 let walls
+let highScores
 let isGameOver = false
 let snakeColors = {
   body: getRandomColor(),
@@ -369,6 +370,9 @@ function showPauseScreen() {
   );
 }
 function showGameOverScreen() {
+
+  const sortedPlayers = Object.entries(players)
+    .sort(([, a], [, b]) => b.snake.score - a.snake.score);
   noStroke();
   fill('black');
 
@@ -377,12 +381,47 @@ function showGameOverScreen() {
   let rectWidth = gameConfig.side / 2;
   let rectHeight = 2 * gameConfig.scale;
 
+
+
+
+  // highscores
+  fill('black');
+  rect(rectX, gameConfig.side * 0.6, rectWidth, (highScores.length + 1) * gameConfig.scale * 1.2, gameConfig.scale);
+  // gameover
   rect(rectX, rectY, rectWidth, rectHeight, gameConfig.scale);
+  // ranking
+  rect(rectX, gameConfig.side * 0.2 - gameConfig.scale, rectWidth, sortedPlayers.length * gameConfig.scale * 1.3, gameConfig.scale);
 
   fill('white');
   textAlign(CENTER, CENTER);
-  textSize(gameConfig.scale * 1.5);
+  textSize(gameConfig.scale);
 
+  textAlign(LEFT, CENTER);
+
+  sortedPlayers.forEach(([, player], i) => {
+    text(
+      `#${i + 1}: ${player.name} - ${player.snake.score} ${(i == 0) ? '🥇' : ''} `,
+      rectX + gameConfig.scale,
+      gameConfig.side * 0.2 + gameConfig.scale * i
+    );
+  });
+
+  textAlign(CENTER, CENTER);
+  text(
+    `${name} HighScores: `,
+    rectX + rectWidth / 2,
+    gameConfig.side * 0.6 + gameConfig.scale
+  );
+
+  highScores.forEach((score, i) =>
+    text(
+      `${score.score} `,
+      rectX + rectWidth / 2,
+      gameConfig.side * 0.6 + gameConfig.scale * (i + 2)
+    )
+  );
+
+  textSize(gameConfig.scale * 1.5);
   text(
     'Game Over',
     rectX + rectWidth / 2,
@@ -415,7 +454,10 @@ function drawUIBox() {
   uiCanvas.text(`⚡ SCORE: ${score}`, 20, 50);
   uiCanvas.text(`🔧 PING: ${pingValue}ms`, 20, 90);
   uiCanvas.text(`🎮 FPS: ${fps}`, 20, 130);
-  Object.keys(players).forEach((key, i) => uiCanvas.text(`🧑 Player #${i + 1}: ${players[key].name}`, 20, 170 + 40 * i))
+  Object.keys(players).forEach((key, i) => {
+    uiCanvas.text(`🧑 Player #${i + 1}: ${players[key].name} `, 20, 170 + 60 * i)
+    uiCanvas.text(`      ${players[key].snake.score ?? 0} `, 20, 170 + 60 * i + 20)
+  })
 
 
   // Frame
@@ -453,9 +495,9 @@ async function getUserScore(userId) {
     if (!response.ok) {
       throw new Error(`Error fetching score: ${response.statusText}`);
     }
-    const scores = await response.json();
-    console.log("User scores:", scores);
-    return scores;
+
+    return await response.json();
+
   } catch (error) {
     console.error("Error retrieving user score:", error);
     return null;
