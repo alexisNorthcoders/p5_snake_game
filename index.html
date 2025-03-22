@@ -15,7 +15,17 @@
 </head>
 
 <body>
+  <div id="login-container" style="display: flex; flex-direction: column; align-items: center;">
+    <h2>Login to Play</h2>
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
+    <button onclick="anonymous()">Play as Anonymous</button>
+    <p id="error-msg" style="color: red;"></p>
+</div>
   
+  <script src="auth.js"></script>
   <script src="utils.js"></script>
   <script src="sketch.js"></script>
   <script src="Snake.js"></script>

@@ -10,6 +10,7 @@ const getWebSocketUrl = () => {
 };
 
 function connectWebSocket() {
+
     if (retryCount >= maxRetries) {
         console.error("❌ Maximum retry attempts reached. Stopping WebSocket reconnection.");
         return;
@@ -25,21 +26,15 @@ function connectWebSocket() {
         retryCount = 0;
         clearTimeout(reconnectTimeout);
 
-        name = localStorage.getItem("username") || prompt("What is your name?");
-
-        // Generate or retrieve a unique player ID
-        playerId = localStorage.getItem("playerId") || randomId();
-        localStorage.setItem("playerId", playerId);
-
-        if (!localStorage.getItem("username")) {
-            localStorage.setItem("username", name);
-        }
+        const userData = JSON.parse(localStorage.getItem("userData"));
+        name = userData.username
+        playerId = String(userData.userId)
 
         console.log(`You joined as ${name}`);
         getUserScore(playerId).then(data => {
             const userScores = data.sort((a, b) => b.score - a.score)
             highScore = userScores[0]?.score
-            highScores = userScores.slice(0,3)
+            highScores = userScores.slice(0, 3)
         })
         socket.send(JSON.stringify({
             event: "newPlayer",

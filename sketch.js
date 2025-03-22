@@ -28,6 +28,7 @@ let name
 let walls
 let highScores
 let isGameOver = false
+let isLoggedIn = false
 let snakeColors = {
   body: getRandomColor(),
   head: getRandomColor(),
@@ -72,7 +73,6 @@ function measurePing() {
 }
 function setup() {
   preload()
-  connectWebSocket();
 }
 function loadConfig(gameConfig, data) {
 
@@ -207,6 +207,7 @@ function windowResized() {
   // resizeCanvasToFitWindow();
 }
 function keyPressed() {
+  if (!isLoggedIn) { return }
   if (keyCode === 66) snakeColors.body = getRandomColor();
   if (keyCode === 72) snakeColors.head = getRandomColor();
   if (keyCode === 69) snakeColors.eyes = getRandomColor();
@@ -263,6 +264,7 @@ function keyPressed() {
 
 // Detect mouse clicks
 function mousePressed() {
+  if (!isLoggedIn) { return }
   // Check if "Set Colors" button is clicked
   if (
     mouseX > buttonX && mouseX < buttonX + buttonWidth &&
