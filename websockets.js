@@ -11,6 +11,10 @@ const getWebSocketUrl = () => {
 
 function connectWebSocket() {
 
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    name = userData.username
+    playerId = String(userData.userId)
+
     if (retryCount >= maxRetries) {
         console.error("❌ Maximum retry attempts reached. Stopping WebSocket reconnection.");
         return;
@@ -18,7 +22,7 @@ function connectWebSocket() {
 
     console.log(`🔄 Attempting WebSocket connection... (Attempt ${retryCount + 1}/${maxRetries})`);
 
-    socket = new WebSocket(getWebSocketUrl());
+    socket = new WebSocket(getWebSocketUrl() + `?playerId=${playerId}`);
 
     socket.onopen = () => {
         connected = true;
@@ -26,12 +30,10 @@ function connectWebSocket() {
         retryCount = 0;
         clearTimeout(reconnectTimeout);
 
-        const userData = JSON.parse(localStorage.getItem("userData"));
-        name = userData.username
-        playerId = String(userData.userId)
+
 
         console.log(`You joined as ${name}`);
-        getUserScore(playerId).then(data => {
+        getUserScore(isAnonymous ? 'anon' : playerId).then(data => {
             const userScores = data.sort((a, b) => b.score - a.score)
             highScore = userScores[0]?.score
             highScores = userScores.slice(0, 3)

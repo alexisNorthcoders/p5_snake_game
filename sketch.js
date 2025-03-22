@@ -29,6 +29,7 @@ let walls
 let highScores
 let isGameOver = false
 let isLoggedIn = false
+let isAnonymous = false
 let snakeColors = {
   body: getRandomColor(),
   head: getRandomColor(),
@@ -396,7 +397,7 @@ function showGameOverScreen() {
 
   fill('white');
   textAlign(CENTER, CENTER);
-  textSize(gameConfig.scale);
+  textSize(gameConfig.scale/2);
 
   textAlign(LEFT, CENTER);
 
@@ -410,7 +411,7 @@ function showGameOverScreen() {
 
   textAlign(CENTER, CENTER);
   text(
-    `${name} HighScores: `,
+    `${isAnonymous ? 'anons' : name} HighScores: `,
     rectX + rectWidth / 2,
     gameConfig.side * 0.6 + gameConfig.scale
   );
@@ -457,8 +458,8 @@ function drawUIBox() {
   uiCanvas.text(`🔧 PING: ${pingValue}ms`, 20, 90);
   uiCanvas.text(`🎮 FPS: ${fps}`, 20, 130);
   Object.keys(players).forEach((key, i) => {
-    uiCanvas.text(`🧑 Player #${i + 1}: ${players[key].name} `, 20, 170 + 60 * i)
-    uiCanvas.text(`      ${players[key].snake.score ?? 0} `, 20, 170 + 60 * i + 20)
+    uiCanvas.text(`${players[key].type === 'server' ? '🤖' : '🧑'} ${players[key].name}`, 20, 170 + 60 * i)
+    uiCanvas.text(`     ${players[key].snake.score ?? 0} `, 20, 170 + 60 * i + 20)
   })
 
 

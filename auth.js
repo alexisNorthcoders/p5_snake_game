@@ -33,6 +33,7 @@ async function login(username, password) {
 }
 
 async function anonymous() {
+    isAnonymous = true
     const id = randomId()
     const userData = {
         token: 'no-token',

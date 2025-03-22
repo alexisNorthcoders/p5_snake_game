@@ -60,7 +60,7 @@ class Snake {
         this.colors.eyes = 'gray'
         this.colors.body = 'darkred'
         if (id === playerId) {
-            await postUserScore(playerId)
+            await postUserScore(isAnonymous ? 'anon' : playerId)
             console.log(`Posted score of ${score} for PlayerId: ${playerId} `)
         }
     }
