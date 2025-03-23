@@ -1,4 +1,13 @@
-const API_URL = "http://raspberrypi.local:4123";
+const getAPIUrl = () => {
+    if (window.location.hostname === "raspberrypi.local") {
+        return "http://raspberrypi.local:4123";
+    } else if (window.location.hostname === "alexisraspberry.duckdns.org") {
+        return "https://clipboard.duckdns.org";
+    } else {
+        console.error("Unknown hostname, defaulting to secure WebSocket");
+        return "https://clipboard.duckdns.org";
+    }
+};
 
 async function login(username, password) {
 
@@ -7,7 +16,7 @@ async function login(username, password) {
         password = document.getElementById("password").value;
     }
 
-    const response = await fetch(`${API_URL}/login`, {
+    const response = await fetch(`${getAPIUrl()}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -53,7 +62,7 @@ async function register() {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    const response = await fetch(`${API_URL}/register`, {
+    const response = await fetch(`${getAPIUrl()}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -70,7 +79,7 @@ async function logout() {
 
     const userData = JSON.parse(localStorage.getItem("userData"));
 
-    await fetch(`${API_URL}/logout`, {
+    await fetch(`${getAPIUrl()}/logout`, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${userData.token}`

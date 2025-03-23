@@ -69,8 +69,9 @@ function playChompSound() {
   chompSound.play();
 }
 function measurePing() {
+  // sending 1 byte 0x01
+  socket.send(new Uint8Array([1]));
   startTime = Date.now();
-  socket.send(JSON.stringify({ event: "ping" }))
 }
 function setup() {
   preload()
@@ -229,18 +230,22 @@ function keyPressed() {
     case 38:
     case 87:
       key = 'UP';
+      sendPlayerMovement(key)
       break;
     case 40:
     case 83:
       key = 'DOWN';
+      sendPlayerMovement(key)
       break;
     case 37:
     case 65:
       key = 'LEFT';
+      sendPlayerMovement(key)
       break;
     case 39:
     case 68:
       key = 'RIGHT';
+      sendPlayerMovement(key)
       break;
     case 82:
       restartGame()
@@ -250,17 +255,18 @@ function keyPressed() {
       if (gameStarted)// pauseGame()
         break;
   }
+
+
+}
+
+function sendPlayerMovement(key) {
   if (socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({
       event: "playerMovement",
-      player: {
-        name,
-        id: playerId,
-      },
+      id: playerId,
       key
     }));
   }
-
 }
 
 // Detect mouse clicks
@@ -384,9 +390,6 @@ function showGameOverScreen() {
   let rectWidth = gameConfig.side / 2;
   let rectHeight = 2 * gameConfig.scale;
 
-
-
-
   // highscores
   fill('black');
   rect(rectX, gameConfig.side * 0.6, rectWidth, (highScores.length + 1) * gameConfig.scale * 1.2, gameConfig.scale);
@@ -397,7 +400,7 @@ function showGameOverScreen() {
 
   fill('white');
   textAlign(CENTER, CENTER);
-  textSize(gameConfig.scale/2);
+  textSize(gameConfig.scale / 2);
 
   textAlign(LEFT, CENTER);
 

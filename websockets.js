@@ -38,18 +38,20 @@ function connectWebSocket() {
             highScore = userScores[0]?.score
             highScores = userScores.slice(0, 3)
         })
-        socket.send(JSON.stringify({
-            event: "newPlayer",
-            player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
-        }));
-        socket.send(JSON.stringify({
-            event: "getConfig"
-        }));
+        if (!gameStarted && !isGameOver) {
+            socket.send(JSON.stringify({
+                event: "newPlayer",
+                player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
+            }));
+            socket.send(JSON.stringify({
+                event: "getConfig"
+            }));
 
-        socket.send(JSON.stringify({
-            event: "waitingRoomStatus"
-        }));
-        measurePing();
+            socket.send(JSON.stringify({
+                event: "waitingRoomStatus"
+            }));
+            measurePing();
+        }
     };
 
     socket.onerror = (error) => {
@@ -57,15 +59,23 @@ function connectWebSocket() {
         retryConnection();
     };
 
-    socket.onmessage = (event) => {
+    socket.onmessage = async (event) => {
         try {
+             // Handle binary pong
+        if (event.data instanceof Blob) {
+            const arrayBuffer = await event.data.arrayBuffer();
+            const view = new Uint8Array(arrayBuffer);
+
+            if (view.length === 1 && view[0] === 2) {
+                // Binary pong received
+                pingValue = Date.now() - startTime;
+                setTimeout(measurePing, 1000);
+                return;
+            }
+        }
             const data = JSON.parse(event.data);
 
             switch (data.event) {
-                case "pong":
-                    pingValue = Date.now() - startTime;
-                    setTimeout(measurePing, 1000);
-                    break
                 case "waitingRoomStatus":
                     console.log("waitingRoomStatus", data)
                     data.players.forEach((player) => players[player.id] = { ...player, snake: new Snake(player.snake?.x, player.snake?.y, player.type, player.colours, player.snake.size) })
