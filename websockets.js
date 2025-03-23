@@ -61,18 +61,27 @@ function connectWebSocket() {
 
     socket.onmessage = async (event) => {
         try {
-             // Handle binary pong
-        if (event.data instanceof Blob) {
-            const arrayBuffer = await event.data.arrayBuffer();
-            const view = new Uint8Array(arrayBuffer);
+            // Handle binary pong
+            if (event.data instanceof Blob) {
+                const arrayBuffer = await event.data.arrayBuffer();
+                const view = new Uint8Array(arrayBuffer);
 
-            if (view.length === 1 && view[0] === 2) {
-                // Binary pong received
-                pingValue = Date.now() - startTime;
-                setTimeout(measurePing, 1000);
-                return;
+                if (view.length === 1 && view[0] === 2) {
+                    // Binary pong received
+                    pingValue = Date.now() - startTime;
+                    setTimeout(measurePing, 1000);
+                    return;
+                }
             }
-        }
+            if (!event.data.startsWith('{')) {
+                switch (event.data) {
+                    case "p":
+                        pingValue = Date.now() - startTime;
+                        setTimeout(measurePing, 1000);
+                        return
+                }
+
+            }
             const data = JSON.parse(event.data);
 
             switch (data.event) {

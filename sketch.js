@@ -69,8 +69,7 @@ function playChompSound() {
   chompSound.play();
 }
 function measurePing() {
-  // sending 1 byte 0x01
-  socket.send(new Uint8Array([1]));
+  socket.send("p");
   startTime = Date.now();
 }
 function setup() {
@@ -229,22 +228,22 @@ function keyPressed() {
       break
     case 38:
     case 87:
-      key = 'UP';
+      key = 'u';
       sendPlayerMovement(key)
       break;
     case 40:
     case 83:
-      key = 'DOWN';
+      key = 'd';
       sendPlayerMovement(key)
       break;
     case 37:
     case 65:
-      key = 'LEFT';
+      key = 'l';
       sendPlayerMovement(key)
       break;
     case 39:
     case 68:
-      key = 'RIGHT';
+      key = 'r';
       sendPlayerMovement(key)
       break;
     case 82:
@@ -261,11 +260,7 @@ function keyPressed() {
 
 function sendPlayerMovement(key) {
   if (socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify({
-      event: "playerMovement",
-      id: playerId,
-      key
-    }));
+    socket.send(`m:${playerId}:${key}`);
   }
 }
 
