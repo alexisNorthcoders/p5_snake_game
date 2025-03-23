@@ -5,7 +5,7 @@ const maxRetries = 10;
 let connected = false;
 let gameConfigured = false;
 let waitingRoom = true;
-let minPlayers = 1;
+let minPlayers = 2;
 let pingValue = 0
 let uiCanvas
 let showGrid = false;
@@ -150,7 +150,7 @@ function showWaitingRoom() {
   text(`${name} highest score: ${highScore}`, gameConfig.side / 2 + gameConfig.leftSectionSize, gameConfig.scale)
   textAlign(CENTER, CENTER);
   text(
-    `${gameConfig.waitingRoom.waitingRoomMessage} Waiting for players... (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
+    `${gameConfig.waitingRoom.waitingRoomMessage} (${Object.keys(players).length}/${minPlayers})\nPress ENTER to start`,
     gameConfig.side / 2 + gameConfig.leftSectionSize,
     gameConfig.side * 0.2
   );
@@ -214,7 +214,7 @@ function keyPressed() {
   if (keyCode === 72) snakeColors.head = getRandomColor();
   if (keyCode === 69) snakeColors.eyes = getRandomColor();
   // press Enter to start game
-  if (waitingRoom && keyCode === ENTER && Object.keys(players).length >= minPlayers) {
+  if (waitingRoom && keyCode === ENTER) {
     socket.send(JSON.stringify({ event: "startGame" }));
   }
 
