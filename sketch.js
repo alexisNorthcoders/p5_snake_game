@@ -69,6 +69,7 @@ function playChompSound() {
   chompSound.play();
 }
 function measurePing() {
+  if (isGameOver) { return }
   socket.send("p");
   startTime = Date.now();
 }
@@ -358,6 +359,13 @@ async function restartGame() {
 }
 function gameOver() {
   isGameOver = true
+
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.close();
+    console.log("WebSocket connection closed.");
+  } else {
+    console.log("WebSocket is not open.");
+  }
   noLoop()
 }
 function showPauseScreen() {

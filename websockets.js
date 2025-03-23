@@ -131,6 +131,9 @@ function connectWebSocket() {
     };
 
     socket.onclose = () => {
+        if (isGameOver) {
+            return
+        }
         console.warn("⚠️ WebSocket disconnected, attempting to reconnect...");
         retryConnection();
     };
