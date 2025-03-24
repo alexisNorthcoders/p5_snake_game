@@ -86,14 +86,23 @@ Multiplayer
 - ✅ Add score logic to the server
 - ✅ Add dead status
 - ✅ Add Game Over event
+- Improve login screen
+- Add ranking feature
+- Save settings ( snake colour)
+- Add currency
+- Add unlocking skins / maps
+- Add obstacles in the map
 - Add ability to restart game after game over
 - Add different types of food / multiple scores
 - Add score multiplier
 - Move pause game logic to server
-- Allow multiple rooms
+- ✅ Allow multiple rooms
 - Allow for single game mode / local multiplayer only
 - Single game mode features only ( framerate, canvas resize, etc)
 - Optimize websockets message to reduce size and increase performance
+   - ✅ Optimized ping message to a single byte
+   - ✅ Optimized player movement to a string with format "m:playerId:key"
+   - WIP: Optimize snake_update event. Remove colours being sent in every message. Refactor logic on tail positions.
 
 ## Bugs
 - ✅ Food being spawned many times or in not in the same place for all clients 

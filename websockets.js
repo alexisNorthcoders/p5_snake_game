@@ -87,6 +87,7 @@ function connectWebSocket() {
             switch (data.event) {
                 case "waitingRoomStatus":
                     console.log("waitingRoomStatus", data)
+                    players = {}
                     data.players.forEach((player) => players[player.id] = { ...player, snake: new Snake(player.snake?.x, player.snake?.y, player.type, player.colours, player.snake.size) })
                     break;
                 case "startGame":
@@ -111,15 +112,23 @@ function connectWebSocket() {
                     break;
                 case "snake_update":
                     const { snakesMap } = data
-                    for (let id in snakesMap) {
-                        if (id === playerId) score = snakesMap[id].snake.score
-                        if (players[id].snake.isDead) continue
-                        players[id].snake.tail = snakesMap[id].snake.tail
-                        players[id].snake.x = snakesMap[id].snake.x
-                        players[id].snake.y = snakesMap[id].snake.y
-                        players[id].snake.score = snakesMap[id].snake.score
-                        if (snakesMap[id].snake.isDead) players[id].snake.stop(id)
-                    }
+                    for (const id in snakesMap) {
+                        const updatedSnake = snakesMap[id].snake;
+                        const currentSnake = players[id].snake;
+                    
+                        if (id === playerId) score = updatedSnake.score;
+                    
+                        if (currentSnake.isDead) continue;
+                    
+                        Object.assign(currentSnake, {
+                            tail: updatedSnake.tail,
+                            x: updatedSnake.x,
+                            y: updatedSnake.y,
+                            score: updatedSnake.score
+                        });
+                    
+                        if (updatedSnake.isDead) currentSnake.stop(id);
+                    }   
                     break;
 
                 default:
