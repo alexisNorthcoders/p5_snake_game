@@ -40,7 +40,7 @@ let previewX, previewY, backgroundPreviewX, backgroundPreviewY;
 let snakeImg;
 let appleImg;
 const backgroundImages = []
-let randomBackground = Math.ceil(Math.random() * 91)
+let randomBackground;
 let bgBuffer;
 function preload() {
   snakeImg = loadImage('snakelogo.png');
@@ -83,7 +83,7 @@ function loadConfig(gameConfig, data) {
   console.log(data)
 
   const { config, food } = data
-
+  randomBackground = config.backgroundNumber
   gameConfig.side = config.side
   gameConfig.leftSectionSize = config.leftSectionSize
   gameConfig.backgroundColour = config.backgroundColour
@@ -162,14 +162,6 @@ function showWaitingRoom() {
   // Draw color preview
   previewX = gameConfig.side / 2 - 40 + gameConfig.leftSectionSize;
   previewY = gameConfig.side / 2 + 30;
-
-  textSize(gameConfig.scale * 0.4);
-  text("Click to change background:", backgroundPreviewX - gameConfig.scale * 0.4 * 7, backgroundPreviewY + gameConfig.scale / 2);
-
-  backgroundPreviewX = gameConfig.side * 0.5 + gameConfig.leftSectionSize
-  backgroundPreviewY = gameConfig.side * 0.3, gameConfig.scale
-
-  image(backgroundImages[randomBackground], backgroundPreviewX, backgroundPreviewY, gameConfig.scale, gameConfig.scale);
 
   strokeWeight(2);
   stroke('black');
@@ -279,15 +271,7 @@ function mousePressed() {
     }));
     return;
   }
-  // Check is background preview is clicked
-  if (
-    mouseX > backgroundPreviewX && mouseX < backgroundPreviewX + gameConfig.scale &&
-    mouseY > backgroundPreviewY && mouseY < backgroundPreviewY + gameConfig.scale
-  ) {
-    console.log('clicked background')
-    randomBackground = Math.ceil(Math.random() * 91)
-    return;
-  }
+
   // Check if body is clicked
   if (
     mouseX > previewX - 40 && mouseX < previewX + 20 &&

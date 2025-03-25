@@ -43,13 +43,6 @@ function connectWebSocket() {
                 event: "newPlayer",
                 player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
             }));
-            socket.send(JSON.stringify({
-                event: "getConfig"
-            }));
-
-            socket.send(JSON.stringify({
-                event: "waitingRoomStatus"
-            }));
             measurePing();
         }
     };
@@ -107,7 +100,7 @@ function connectWebSocket() {
                 case "updateFood":
                     const { food } = data
                     const [col, row, id] = food[0]
-                    playChompSound()
+                 //   playChompSound()
                     updateFood(col, row, id)
                     break;
                 case "snake_update":
