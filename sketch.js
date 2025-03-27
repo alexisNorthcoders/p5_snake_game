@@ -30,6 +30,8 @@ let highScores
 let isGameOver = false
 let isLoggedIn = false
 let isAnonymous = false
+let newGameButton
+let setColoursButton
 let snakeColors = {
   body: getRandomColor(),
   head: getRandomColor(),
@@ -99,6 +101,19 @@ function loadConfig(gameConfig, data) {
   createCanvas(gameConfig.side + gameConfig.leftSectionSize, gameConfig.side);
   noSmooth();
   uiCanvas = createGraphics(gameConfig.leftSectionSize, gameConfig.side);
+
+  newGameButton = createButton('New Game')
+  newGameButton.position(gameConfig.leftSectionSize + gameConfig.side * 0.5, gameConfig.side * 0.9)
+  newGameButton.mousePressed(restartGame)
+  newGameButton.addClass('button')
+  newGameButton.style(`background-color: #f1c40f;color: #2c3e50;padding: 10px 20px;font-size: ${gameConfig.scale*0.5}px`)
+  newGameButton.hide()
+
+
+  setColoursButton = createButton('Update Colours')
+  setColoursButton.position(gameConfig.leftSectionSize + gameConfig.side * 0.5,gameConfig.side * 0.6 )
+  setColoursButton.mousePressed(updateColors)
+  setColoursButton.style(`background-color: #f1c40f;color: #2c3e50;padding: 10px 20px;font-size: ${gameConfig.scale*0.5}px`)
 }
 function drawBackground(img) {
 
@@ -183,19 +198,6 @@ function showWaitingRoom() {
   rect(previewX + 30 - 5, previewY + 5, 5);
   rect(previewX + 30 + 5, previewY + 5, 5);
 
-  // Draw "Set Colors" button
-  buttonX = gameConfig.side / 2 - 50 + gameConfig.leftSectionSize;
-  buttonY = gameConfig.side / 2 + 80;
-  fill(50, 150, 255);
-  strokeWeight(2);
-  stroke(255);
-  rect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
-
-  fill(255);
-  noStroke();
-  textSize(18);
-  textAlign(CENTER, CENTER);
-  text("Set Colors", buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
 }
 function windowResized() {
   // resizeCanvasToFitWindow();
@@ -260,17 +262,6 @@ function sendPlayerMovement(key) {
 // Detect mouse clicks
 function mousePressed() {
   if (!isLoggedIn) { return }
-  // Check if "Set Colors" button is clicked
-  if (
-    mouseX > buttonX && mouseX < buttonX + buttonWidth &&
-    mouseY > buttonY && mouseY < buttonY + buttonHeight
-  ) {
-    socket.send(JSON.stringify({
-      event: "updatePlayer",
-      player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
-    }));
-    return;
-  }
 
   // Check if body is clicked
   if (
@@ -299,6 +290,13 @@ function mousePressed() {
     snakeColors.eyes = getRandomColor();
     return;
   }
+}
+
+function updateColors() {
+  socket.send(JSON.stringify({
+    event: "updatePlayer",
+    player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
+  }));
 }
 
 function spawnFood() {
@@ -330,6 +328,7 @@ function resizeCanvasToFitWindow() {
 }
 function startGame() {
   if (connected && gameConfigured) {
+    setColoursButton.hide()
     spawnFood()
     gameStarted = true
     loop();
@@ -343,6 +342,7 @@ async function restartGame() {
 }
 function gameOver() {
   isGameOver = true
+  newGameButton.show()
 
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.close();
@@ -365,8 +365,11 @@ function showPauseScreen() {
     gameConfig.side / 2
   );
 }
-function showGameOverScreen() {
 
+
+
+function showGameOverScreen() {
+  noLoop()
   const sortedPlayers = Object.entries(players)
     .sort(([, a], [, b]) => b.snake.score - a.snake.score);
   noStroke();
@@ -420,6 +423,7 @@ function showGameOverScreen() {
     rectX + rectWidth / 2,
     rectY + rectHeight / 2
   );
+
 }
 function showPing() {
   stroke('black');
