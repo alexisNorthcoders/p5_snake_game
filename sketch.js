@@ -114,6 +114,7 @@ function loadConfig(gameConfig, data) {
   setColoursButton.position(gameConfig.leftSectionSize + gameConfig.side * 0.5,gameConfig.side * 0.6 )
   setColoursButton.mousePressed(updateColors)
   setColoursButton.style(`background-color: #f1c40f;color: #2c3e50;padding: 10px 20px;font-size: ${gameConfig.scale*0.5}px`)
+  setColoursButton.hide()
 }
 function drawBackground(img) {
 
@@ -133,6 +134,7 @@ function draw() {
 
 
   if (waitingRoom) {
+    setColoursButton.show()
     drawUIBox()
     showWaitingRoom();
     return;
@@ -335,10 +337,20 @@ function startGame() {
   }
 }
 async function restartGame() {
+  newGameButton.hide()
+  foodConfig.storage.length = 0
+  foodConfig.coordinates.length = 0
+  foodConfig.quantity = 0
+  console.log(foodConfig)
+  gameConfigured = false
+  gameStarted = false
+  isGameOver = false
+  waitingRoom = true
   console.log('Reseting game...')
   score = 0;
   spawnFood()
   loop();
+  connectWebSocket();
 }
 function gameOver() {
   isGameOver = true
