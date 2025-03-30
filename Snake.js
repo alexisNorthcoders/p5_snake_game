@@ -2,8 +2,8 @@ class Snake {
     constructor(x = 2 + gameConfig.leftSectionSize, y = 4, type = 'player', colors = {}, size = 0) {
         this.type = type
         this.start = { x, y }
-        this.x = x
-        this.y = y
+        this.x = gameConfig.leftSectionSize + x * gameConfig.gridSize
+        this.y = y * gameConfig.gridSize
         this.size = size;
         this.tail = []
         this.glow = false
@@ -26,8 +26,8 @@ class Snake {
         this.speed.y = y;
     }
     position({ x, y }) {
-        this.x = x;
-        this.y = y;
+        this.x = gameConfig.leftSectionSize + x * gameConfig.gridSize;
+        this.y = y * gameConfig.gridSize;
     }
     draw() {
         const bodyColor = this.colors.body;
@@ -51,7 +51,7 @@ class Snake {
             fill(bodyColorTransparent);
             strokeWeight(2);
             stroke(`rgba(0, 0, 0, ${this.transparent})`);
-            square(segment.x, segment.y, gameConfig.scale);
+            square(gameConfig.leftSectionSize + segment.x * gameConfig.gridSize, segment.y * gameConfig.gridSize, gameConfig.gridSize);
         }
 
         // Draw head

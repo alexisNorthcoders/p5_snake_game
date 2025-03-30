@@ -1,14 +1,14 @@
 class Food {
     constructor(col, row, id, type = 'normal') {
-        this.x = col
-        this.y = row
+        this.x = gameConfig.leftSectionSize + col * gameConfig.gridSize
+        this.y = row * gameConfig.gridSize
         this.type = type
         this.keyframe = 0
         this.id = id
     }
     position({ x, y }) {
-        this.x = x
-        this.y = y
+        this.x = gameConfig.leftSectionSize + x * gameConfig.gridSize
+        this.y = y * gameConfig.gridSize
     }
     draw() {
 

@@ -90,9 +90,10 @@ function loadConfig(gameConfig, data) {
   gameConfig.leftSectionSize = config.leftSectionSize
   gameConfig.backgroundColour = config.backgroundColour
   gameConfig.waitingRoom = config.waitingRoom
+  gameConfig.gridSize = config.gridSize
   gameConfig.scale = gameConfig.side / config.scaleFactor
-  gameConfig.cols = gameConfig.side / gameConfig.scale
-  gameConfig.rows = gameConfig.side / gameConfig.scale
+  gameConfig.cols = config.scaleFactor
+  gameConfig.rows = config.scaleFactor
   foodConfig.coordinates = food
   foodConfig.quantity = food.length
   fps = config.fps
@@ -103,17 +104,17 @@ function loadConfig(gameConfig, data) {
   uiCanvas = createGraphics(gameConfig.leftSectionSize, gameConfig.side);
 
   newGameButton = createButton('New Game')
-  newGameButton.position(gameConfig.leftSectionSize + gameConfig.side * 0.5, gameConfig.side * 0.9)
+  newGameButton.position(gameConfig.leftSectionSize / 2, gameConfig.side * 0.5)
   newGameButton.mousePressed(restartGame)
-  newGameButton.addClass('button')
-  newGameButton.style(`background-color: #f1c40f;color: #2c3e50;padding: 10px 20px;font-size: ${gameConfig.scale*0.5}px`)
-  newGameButton.hide()
+  newGameButton.style(`background-color: #f1c40f;color: #2c3e50;padding: 10px 20px;font-size: ${gameConfig.scale * 0.5}px`)
+  newGameButton.attribute('disabled', '');
+
 
 
   setColoursButton = createButton('Update Colours')
-  setColoursButton.position(gameConfig.leftSectionSize + gameConfig.side * 0.5,gameConfig.side * 0.6 )
+  setColoursButton.position(gameConfig.leftSectionSize + gameConfig.side * 0.5, gameConfig.side * 0.6)
   setColoursButton.mousePressed(updateColors)
-  setColoursButton.style(`background-color: #f1c40f;color: #2c3e50;padding: 10px 20px;font-size: ${gameConfig.scale*0.5}px`)
+  setColoursButton.style(`background-color: #f1c40f;color: #2c3e50;padding: 10px 20px;font-size: ${gameConfig.scale * 0.5}px`)
   setColoursButton.hide()
 }
 function drawBackground(img) {
@@ -354,7 +355,7 @@ async function restartGame() {
 }
 function gameOver() {
   isGameOver = true
-  newGameButton.show()
+  newGameButton.removeAttribute('disabled');
 
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.close();

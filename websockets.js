@@ -1,6 +1,6 @@
 const getWebSocketUrl = () => {
     if (window.location.hostname === "raspberrypi.local") {
-        return "ws://raspberrypi.local:4002/ws";
+        return "ws://192.168.4.29:4002/ws" // "ws://raspberrypi.local:4002/ws"
     } else if (window.location.hostname === "alexisraspberry.duckdns.org") {
         return "wss://alexisraspberry.duckdns.org/ws";
     } else {
@@ -100,7 +100,7 @@ function connectWebSocket() {
                 case "updateFood":
                     const { food } = data
                     const [col, row, id] = food[0]
-                 //   playChompSound()
+                    //   playChompSound()
                     updateFood(col, row, id)
                     break;
                 case "snake_update":
@@ -108,21 +108,38 @@ function connectWebSocket() {
                     for (const id in snakesMap) {
                         const updatedSnake = snakesMap[id].snake;
                         const currentSnake = players[id].snake;
-                    
+
                         if (id === playerId) score = updatedSnake.score;
-                    
+
                         if (currentSnake.isDead) continue;
-                    
-                        Object.assign(currentSnake, {
-                            tail: updatedSnake.tail,
-                            x: updatedSnake.x,
-                            y: updatedSnake.y,
-                            score: updatedSnake.score
-                        });
-                    
+
+                        currentSnake.tail = updatedSnake.tail
+                        currentSnake.score = updatedSnake.score
+                        currentSnake.position({ x: updatedSnake.x, y: updatedSnake.y })
+
                         if (updatedSnake.isDead) currentSnake.stop(id);
-                    }   
+                    }
                     break;
+
+                case "snake_update_v2":
+                    const { snakes } = data
+
+                    for (const snake of snakes) {
+                        const currentSnake = players[snake.playerId].snake;
+
+                        if (snake.playerId === playerId) score = snake.score
+                        if (currentSnake.isDead) continue
+
+                        currentSnake.tail = snake.tail
+                        currentSnake.score = snake.score
+                        currentSnake.position({ x: snake.x, y: snake.y })
+
+                        if (snake.isDead) currentSnake.stop(snake.playerId)
+                    }
+
+                    break
+
+
 
                 default:
                     console.warn("Unknown event received:", data);
