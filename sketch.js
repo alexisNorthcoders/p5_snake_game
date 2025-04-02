@@ -40,13 +40,17 @@ let snakeColors = {
 let buttonX, buttonY, buttonWidth = 100, buttonHeight = 40;
 let previewX, previewY, backgroundPreviewX, backgroundPreviewY;
 let snakeImg;
-let appleImg;
+let redAppleImg;
+let greenAppleImg;
+let yellowAppleImg;
 const backgroundImages = []
 let randomBackground;
 let bgBuffer;
 function preload() {
   snakeImg = loadImage('snakelogo.png');
-  appleImg = loadImage('assets/images/apple.png');
+  redAppleImg = loadImage('assets/images/food/tile000.png');
+  greenAppleImg = loadImage('assets/images/food/tile001.png');
+  yellowAppleImg = loadImage('assets/images/food/tile002.png');
   // load backgrounds
   for (let i = 1; i <= 91; i++) {
     backgroundImages.push(loadImage(`assets/images/backgrounds/color_background_${i}.png`));
@@ -305,14 +309,15 @@ function updateColors() {
 function spawnFood() {
 
   for (let i = 0; i < foodConfig.quantity; i++) {
-    const [col, row, id] = foodConfig.coordinates[i]
-    foodConfig.storage.push(new Food(col, row, id))
+    const [col, row, id, type] = foodConfig.coordinates[i]
+    foodConfig.storage.push(new Food(col, row, id, type))
   }
 }
-function updateFood(col, row, id) {
+function updateFood(col, row, id, type) {
   // only update the food changing position
   const foodToUpdate = foodConfig.storage.find(food => food.id === id)
   foodToUpdate.position({ x: col, y: row })
+  foodToUpdate.type = type
 }
 function drawGrid() {
   stroke('white');
