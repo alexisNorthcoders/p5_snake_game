@@ -21,6 +21,18 @@ class Food {
             case 'yellowApple':
                 image(yellowAppleImg, this.x, this.y, gameConfig.scale, gameConfig.scale)
                 break
+            case 'strawberry':
+                image(strawberryImg, this.x, this.y, gameConfig.scale, gameConfig.scale)
+                break
+            case 'cherry':
+                image(cherryImg, this.x, this.y, gameConfig.scale, gameConfig.scale)
+                break
+            case 'chili':
+                image(chiliImg, this.x, this.y, gameConfig.scale, gameConfig.scale)
+                break
+            case 'banana':
+                image(bananaImg, this.x, this.y, gameConfig.scale, gameConfig.scale)
+                break
         }
     }
 }

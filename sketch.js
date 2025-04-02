@@ -43,6 +43,10 @@ let snakeImg;
 let redAppleImg;
 let greenAppleImg;
 let yellowAppleImg;
+let strawberryImg;
+let cherryImg;
+let chiliImg;
+let bananaImg;
 const backgroundImages = []
 let randomBackground;
 let bgBuffer;
@@ -51,6 +55,10 @@ function preload() {
   redAppleImg = loadImage('assets/images/food/tile000.png');
   greenAppleImg = loadImage('assets/images/food/tile001.png');
   yellowAppleImg = loadImage('assets/images/food/tile002.png');
+  strawberryImg = loadImage('assets/images/food/tile027.png');
+  cherryImg = loadImage('assets/images/food/tile204.png');
+  chiliImg = loadImage('assets/images/food/tile068.png');
+  bananaImg = loadImage('assets/images/food/tile045.png');
   // load backgrounds
   for (let i = 1; i <= 91; i++) {
     backgroundImages.push(loadImage(`assets/images/backgrounds/color_background_${i}.png`));
