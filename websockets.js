@@ -1,6 +1,7 @@
 const getWebSocketUrl = () => {
-    if (window.location.hostname === "raspberrypi.local") {
-        return "ws://192.168.4.29:4002/ws" // "ws://raspberrypi.local:4002/ws"
+
+    if (window.location.hostname === "95.217.177.76" || window.location.hostname === "snakemp.duckdns.org") {
+        return "wss://snakemp.duckdns.org/ws" // "ws://raspberrypi.local:4002/ws"
     } else if (window.location.hostname === "alexisraspberry.duckdns.org") {
         return "wss://alexisraspberry.duckdns.org/ws";
     } else {
@@ -11,9 +12,10 @@ const getWebSocketUrl = () => {
 
 function connectWebSocket() {
 
-    const userData = JSON.parse(localStorage.getItem("userData"));
-    name = userData.username
-    playerId = String(userData.userId)
+    const { username, token, userId } = JSON.parse(localStorage.getItem("userData"));
+   
+    name = username
+    playerId = String(userId)
 
     if (retryCount >= maxRetries) {
         console.error("❌ Maximum retry attempts reached. Stopping WebSocket reconnection.");
@@ -22,7 +24,7 @@ function connectWebSocket() {
 
     console.log(`🔄 Attempting WebSocket connection... (Attempt ${retryCount + 1}/${maxRetries})`);
 
-    socket = new WebSocket(getWebSocketUrl() + `?playerId=${playerId}`);
+    socket = new WebSocket(getWebSocketUrl() + `?player_id=${playerId}&access_token=${token}`);
 
     socket.onopen = () => {
         connected = true;
@@ -30,21 +32,12 @@ function connectWebSocket() {
         retryCount = 0;
         clearTimeout(reconnectTimeout);
 
-
-
         console.log(`You joined as ${name}`);
         getUserScore(isAnonymous ? 'anon' : playerId).then(data => {
             const userScores = data.sort((a, b) => b.score - a.score)
             highScore = userScores[0]?.score
             highScores = userScores.slice(0, 3)
         })
-        if (!gameStarted && !isGameOver) {
-            socket.send(JSON.stringify({
-                event: "newPlayer",
-                player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
-            }));
-            measurePing();
-        }
     };
 
     socket.onerror = (error) => {
@@ -62,7 +55,7 @@ function connectWebSocket() {
                 if (view.length === 1 && view[0] === 2) {
                     // Binary pong received
                     pingValue = Date.now() - startTime;
-                    setTimeout(measurePing, 1000);
+                    setTimeout(measurePing, 5000);
                     return;
                 }
             }
@@ -70,7 +63,7 @@ function connectWebSocket() {
                 switch (event.data) {
                     case "p":
                         pingValue = Date.now() - startTime;
-                        setTimeout(measurePing, 1000);
+                        setTimeout(measurePing, 5000);
                         return
                 }
 
@@ -78,6 +71,16 @@ function connectWebSocket() {
             const data = JSON.parse(event.data);
 
             switch (data.event) {
+                case "verified":
+                    console.log("Verified connection. Server is ready.")
+                    if (!gameStarted && !isGameOver) {
+                        socket.send(JSON.stringify({
+                            event: "newPlayer",
+                            player: { name, id: playerId, colours: { head: snakeColors.head, body: snakeColors.body, eyes: snakeColors.eyes } }
+                        }));
+                        measurePing();
+                    }
+                    break
                 case "waitingRoomStatus":
                     console.log("waitingRoomStatus", data)
                     players = {}

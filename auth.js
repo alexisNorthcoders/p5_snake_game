@@ -1,7 +1,7 @@
 const getAPIUrl = () => {
     if (window.location.hostname === "raspberrypi.local") {
         return "http://raspberrypi.local:4123";
-    } else if (window.location.hostname === "alexisraspberry.duckdns.org") {
+    } else if (window.location.hostname === "alexisraspberry.duckdns.org" || window.location.hostname === "95.217.177.76" || window.location.hostname === "snakemp.duckdns.org") {
         return "https://clipboard.duckdns.org";
     } else {
         console.error("Unknown hostname, defaulting to secure WebSocket");
@@ -30,10 +30,10 @@ async function login(username, password) {
             username: username,
             userId: data.userId
         };
-        
+
         localStorage.setItem("userData", JSON.stringify(userData));
         isLoggedIn = true
-        
+
         connectWebSocket();
         document.getElementById("login-container").style.display = "none";
     } else {
@@ -42,19 +42,31 @@ async function login(username, password) {
 }
 
 async function anonymous() {
-    isAnonymous = true
-    const id = randomId()
-    const userData = {
-        token: 'no-token',
-        username: `anon-${id}`,
-        userId: id
-    };
     
-    localStorage.setItem("userData", JSON.stringify(userData));
-    isLoggedIn = true
-    
-    connectWebSocket();
-    document.getElementById("login-container").style.display = "none";
+
+    const response = await fetch(`${getAPIUrl()}/anonymous`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    });
+
+    if (response.ok) {
+
+        const data = await response.json();
+        const userData = {
+            token: data.accessToken,
+            username: `anon-${data.userId}`,
+            userId: data.userId
+        };
+
+        localStorage.setItem("userData", JSON.stringify(userData));
+        isAnonymous = true
+        isLoggedIn = true
+
+        connectWebSocket();
+        document.getElementById("login-container").style.display = "none";
+    } else {
+        document.getElementById("error-msg").textContent = "Invalid credentials";
+    }
 
 }
 
